@@ -13,10 +13,14 @@ This walkthrough will guide you through adding a room to a running Game On! serv
 
 ### Installation prerequisites
 
-Gameon-room-go when deployed using containers requires:
+Game On! when deployed using containers requires:
 
- - [Docker](https://docs.docker.com/engine/installation/) - You will need Docker on your host machine to create a docker image to be pushed to IBM Bluemix Containers
- - [IBM Containers CLI](https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_install)
+- [Bluemix account](https://console.ng.bluemix.net)
+- [IBM DevOps Services Account](https://hub.jazz.net/register)
+- [GitHub account](https://github.com/)
+- [Docker](https://docs.docker.com/engine/installation/) - You will need Docker on your host machine to create a docker image to be pushed to IBM Bluemix Containers
+- [IBM Containers CLI](https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_install)
+
 
 ## Create Bluemix accounts and log in
 To build a Game On! room in Bluemix, you will first need a Bluemix account. 
@@ -24,33 +28,35 @@ To build a Game On! room in Bluemix, you will first need a Bluemix account.
 ### Sign up and log into Bluemix and DevOps
 Sign up for Bluemix at https://console.ng.bluemix.net and DevOps Services at https://hub.jazz.net. When you sign up, you'll create an IBM ID, create an alias, and register with Bluemix.
 
-
 ## Get Game On! API Key and User ID
-For a new room to register with the Game On! server, you must first log into game-on.org and sign in using one of several methods to get your Game On! user ID and ApiKey.
+For a new room to register with the Game-On server, you must first log into game-on.org and sign in using one of several methods to get your game-on user ID and ApiKey.
 
-1.	Go to https://game-on.org/ and click **Play**
+1.	Go to [https://game-on.org/](https://game-on.org/) and click **Play**
 2.	Select any authentication method to log in with your username and password for that type.
 3.	Click the **Edit Profile** button(the person icon) at the top right.
 4.	You should now see the ID and API key at the bottom of the page.  You may need to refresh the page to generate the API key.  You will need to make note of your API key for later in the walkthrough.
 
 ## Getting the source code
 
-The source code is located on [GitHub](https://github.com/cfsworkload/).  Download the ZIP and unzip the code, or using the GitHub CLI clone the repository with
+The source code is located in GitHub, navigate to our [source code](https://github.com/cfsworkload/gameon-room-go.git) and fork the project into your own repository.
 
-    git clone https://github.com/cfsworkload/
+1. Navigate to [IBM DevOps](https://hub.jazz.net/)
+2. Click on **CREATE PROJECT**
+3. Select **Link to an existing GitHub repository**
+4. Select **Link to a Git Repo on GitHub**
+5. Click on the dropdown menu that appears, and choose your newly forked project.  
+6. Chose your **Region**, **Organization**, and **Space**.  Generally the defaults will be sufficient.
+7. Click **CREATE**.  The create button will fork your GitHub project into IBM DevOps services, and redirect you to your new project.  
 
-## Updating Code with Game On! credentials
-
-### Configure Node.js room
-For the Node.js room, the server.js file contains information about the new room and your user credentials. The user credentials must be set manually. 
-
-- **gameonAPIKey** - Use the ApiKey value from the game-on.org user settings page.
-- **gameonUID** : Use the Id value from the game-on.org user settings page.
-- **endpointip** : Use the IP requested or retrieved from earlier steps.
-- **port** : The default value is 3000. This port must be opened when running the container.
+## Updating code with Game On! credentials
+To create a room with Game On!, some credentials may need to be added to configuration files.
 
 ### Configure Go room
+All the parameters and credentials are passed in via command line, so there are no pre-configuration steps needed. A room is initialized with parameters passed in to the command:
 
+`$GOPATH/bin/gameon-room-go -c <CONTAINER_IP> -g game-on.org -cp <PORT> -lp <PORT> -r <ROOM_NAME> -id <GAMEON_ID> -apikey <GAMEON_API_KEY>`
+
+The default port as defined in the Dockerfile is the exposed port 3000. If you would like to use another port, or have multiple ports, you would need to expose those in the Dockerfile before creatng your container.
 
 
 ## Make sure a public IP is available in your Bluemix space
@@ -72,11 +78,14 @@ Once installed:
 
 1. Log into your Bluemix account and space.
 
+  `cf login`  
+2. Log into Cloud Foundry for IBM Containers.
+
   `cf ic login`  
-2. List your current external IP addresses.
+3. List your current external IP addresses.
 
   `cf ic ip list`
-3. Release an IP address.
+4. Release an IP address.
 
   `cf ic ip release <public IP>`
 
@@ -105,6 +114,14 @@ To edit a file on a running container, you can log in to the container with the 
 Note: The container has been created with vim to allow editing. You may need this to edit the files in /usr/src/app.
 
 ### Starting a room
-To start the room for your specific language run:
-	- Node.js: `node server.js &`
-	- Go: ./gameon-room-go -c <containerIP> -g <containerIP> -p <port> -r <RoomName>
+To start the room run:
+`$GOPATH/bin/gameon-room-go -c <CONTAINER_IP> -g game-on.org -cp <PORT> -lp <PORT> -r <ROOM_NAME> -id <GAMEON_ID> -apikey <GAMEON_API_KEY>`
+
+The parameters are as follows:
+- CONTAINER_IP - The public IP address to which your container is bound.
+- GAMEON_ID - The ID given in Game On!
+- GAMEON_API_KEY - The API key given in Game On!
+- PORT - The default value is 3000 as it is exposed in the Dockerfile.
+- ROOM_NAME - Your name for the room.
+
+
