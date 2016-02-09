@@ -211,8 +211,12 @@ func registerOurRoom(client *http.Client) (err error) {
 	bodyHash := hash(registration)
 	tokens := []string{config.id, ts, bodyHash}
 	sig := buildHmac(tokens, config.key)
-	u := fmt.Sprintf("http://%s/map/v1/sites",
-		config.gameonAddr)
+	var u string
+	if config.localServer {
+		u = fmt.Sprintf("http://%s/map/v1/sites", config.gameonAddr)
+	} else {
+		u = fmt.Sprintf("https://%s/map/v1/sites", config.gameonAddr)
+	}
 
 	if config.debug {
 		fmt.Printf("\nREG.POST URL: %s\n", u)
@@ -224,7 +228,7 @@ func registerOurRoom(client *http.Client) (err error) {
 	req, err := http.NewRequest("POST", u, strings.NewReader(registration))
 	if err != nil {
 		checkpoint(locus, fmt.Sprintf("NewRequest.Error err=%s", err.Error()))
-		return err
+		return
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -241,7 +245,7 @@ func registerOurRoom(client *http.Client) (err error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		checkpoint(locus, fmt.Sprintf("Post.Error err=%s", err.Error()))
-		return err
+		return
 	}
 	body, err := extractBody(resp)
 	if err != nil {

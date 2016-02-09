@@ -78,7 +78,7 @@ func processCommandline() (err error) {
 	flag.StringVar(&config.id, "id", "", "The id associated with our key.")
 	flag.StringVar(&config.key, "key", localSecret, "Our secret key.")
 	flag.StringVar(&config.owner, "owner", "", "Our user name")
-	flag.BoolVar(&config.localServer, "local", false, "We are using a local server")
+	flag.BoolVar(&config.localServer, "local", false, "We are using a local server. If false, then https is used.")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
