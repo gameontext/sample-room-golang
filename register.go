@@ -24,7 +24,7 @@ const (
 	regMSBetween = 10000
 )
 
-// A RoomExit describes an exit out of a GameOn room.
+// A RoomExit describes an exit out of a GameOn! room.
 // Here is an example of a corresponding JSON fragment:
 //  {
 //    "id":"firstroom",
@@ -88,7 +88,7 @@ type RoomRegistrationResp struct {
 	Type  string              `json:"type,omitempty"`
 }
 
-// Registers our room with the gameOn server, with retries on failure.
+// Registers our room with the GameOn! server, with retries on failure.
 func registerWithRetries() (e error) {
 	locus := "REG_W_RETRIES"
 	checkpoint(locus, fmt.Sprintf("retries=%d msBetween=%d", regRetries, regMSBetween))
@@ -279,8 +279,22 @@ func printRoomRegistrationResp(locus string, r *RoomRegistrationResp) {
 }
 
 // Returns the current time as a UTC-formatted string.
+// If config.timeShift is non-zero, then the timestamp will
+// be shifted by config.timeShift milliseconds. This can be
+// used to slide our registration timestamp closer to the
+// clock on a remote GameOn! server.
 func makeTimestamp() string {
-	return time.Now().UTC().Format(time.RFC3339Nano)
+	if config.timeShift == 0 {
+		return time.Now().UTC().Format(time.RFC3339Nano)
+	}
+	locus := "MAKE.TIMESTAMP"
+	t1 := time.Now()
+	t2 := t1.Add(time.Duration(config.timeShift) * time.Millisecond)
+	ourTime := t1.UTC().Format(time.RFC3339Nano)
+	serverTime := t2.UTC().Format(time.RFC3339Nano)
+	checkpoint(locus, fmt.Sprintf("ourTime    %s", ourTime))
+	checkpoint(locus, fmt.Sprintf("serverTime %s", serverTime))
+	return serverTime
 }
 
 // Generate a JSON string containing our registration info.

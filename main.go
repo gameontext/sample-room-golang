@@ -12,27 +12,38 @@ import (
 const localSecret = "MyRegistrationSecret"
 
 type RoomConfig struct {
+	// The basic address of the GameOn! server.
 	gameonAddr   string
 	callbackAddr string
-	// The callback port is our externally-visible published port.
-	// We send this to the gameOn server so that it can call back.
+	// The callback port is the externally-visible published port that
+	// that will receive websocket traffic from the GameOn! server.
 	callbackPort int
-	// The listening port is the port that our server listens to
-	// internally.  For example, if this code is placed into a
-	// container we would listen internally to one port, say 3000,
-	// and map that to a diffent host port. In this case that different
-	// host port must be our callbackPort.
+	// The listening port is the port that our websocket server listens
+	// to internally.  For example, if this code is placed into a
+	// container we could choose to always listen to one port, say 3000,
+	// and map that to a different host port.
 	listeningPort int
 	// This is the name of our room; use this name when connecting
 	// to our room from another using north, south, east and west.
 	roomName string
-	// Rooms we connect to from any given direction.
+	// Text descriptions of doors that connect us to other rooms.
+	// Although up and down are provided, the GameOn! server typically
+	// ignores any direction other than n,w,e or w.
 	north, south, east, west, up, down string
-	debug                              bool
-	id                                 string
-	key                                string
-	owner                              string
-	localServer                        bool
+	// If true, print a bunch of debugging information useful mostly
+	// to programmers.
+	debug bool
+	// This is the authorization id that was obtained during your
+	// GameOn! browser login. It might look something like this
+	// if you logged in using your Google ID:
+	// 'google:132043241444397884152'
+	id string
+	// This is the secret key that was obtained during your GameOn!
+	// browser login. If you logged in using your Google ID it might
+	// look like this: 'LNIkaoiu62addlGp/rCZc7g,n3s9jUtOpXErr062kos='
+	key         string
+	localServer bool
+	timeShift   int
 }
 
 var config RoomConfig
@@ -62,23 +73,22 @@ func main() {
 // Sets values in the config struct and returns nil
 // if successful or an error otherwise
 func processCommandline() (err error) {
-	err = nil
-	flag.StringVar(&config.gameonAddr, "g", "", "Game-on server address")
+	flag.StringVar(&config.gameonAddr, "g", "", "GameOn! server address")
 	flag.StringVar(&config.callbackAddr, "c", "", "Our published callback address")
 	flag.IntVar(&config.callbackPort, "cp", -1, "Our published callback port")
 	flag.IntVar(&config.listeningPort, "lp", -1, "Our listening port")
 	flag.StringVar(&config.roomName, "r", "", "Our room name.")
 	flag.BoolVar(&config.debug, "d", false, "Enables debug mode")
-	flag.StringVar(&config.north, "north", "A frost-covered door leads to the north.", "/exit N takes us here")
-	flag.StringVar(&config.south, "south", "A moss-covered door leads to the south", "/exit S takes us here")
-	flag.StringVar(&config.east, "east", "A badly-painted door opens to the east.", "/exit E takes us here")
-	flag.StringVar(&config.west, "west", "An old swinging door leads west.", "/exit W takes us here")
-	flag.StringVar(&config.up, "up", "There is a rickety set of steps leading up.", "/exit W takes us here")
-	flag.StringVar(&config.down, "down", "Heat eminates from an opening in the floor.", "/exit W takes us here")
+	flag.StringVar(&config.north, "north", "A frost-covered door leads to the north.", "Describes our northern door")
+	flag.StringVar(&config.south, "south", "A moss-covered door leads to the south", "Describes our southern door")
+	flag.StringVar(&config.east, "east", "A badly-painted door opens to the east.", "Describes our eastern door")
+	flag.StringVar(&config.west, "west", "An old swinging door leads west.", "Describes our western door")
+	flag.StringVar(&config.up, "up", "There is a rickety set of steps leading up.", "GameOn! often ignores this door")
+	flag.StringVar(&config.down, "down", "Heat eminates from an opening in the floor.", "GameOn! often ignores this door")
 	flag.StringVar(&config.id, "id", "", "The id associated with our key.")
 	flag.StringVar(&config.key, "key", localSecret, "Our secret key.")
-	flag.StringVar(&config.owner, "owner", "", "Our user name")
-	flag.BoolVar(&config.localServer, "local", false, "We are using a local server. If false, then https is used.")
+	flag.BoolVar(&config.localServer, "local", false, "We are using a local server. Local servers expect http://; remote servers expect https://")
+	flag.IntVar(&config.timeShift, "ts", 0, "The number of milleseconds to add or subtract from our timestamp so that we can better match the server clock")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
@@ -99,9 +109,6 @@ func processCommandline() (err error) {
 	if config.roomName == "" {
 		config.roomName = fmt.Sprintf("ROOM.%05d", config.callbackPort)
 	}
-	if config.owner == "" {
-		config.owner = config.id
-	}
 	return
 }
 
@@ -109,12 +116,19 @@ func printConfig(c *RoomConfig) {
 	fmt.Printf("gameonAddr=%s\n", config.gameonAddr)
 	fmt.Printf("callbackAddr=%s\n", config.callbackAddr)
 	fmt.Printf("callbackPort=%d\n", config.callbackPort)
+	fmt.Printf("listeningPort=%d\n", config.listeningPort)
 	fmt.Printf("roomName=%s\n", config.roomName)
 	fmt.Printf("north=%s\n", config.north)
 	fmt.Printf("south=%s\n", config.south)
 	fmt.Printf("east=%s\n", config.east)
 	fmt.Printf("west=%s\n", config.west)
 	fmt.Printf("debug=%v\n", config.debug)
+	fmt.Printf("localServer=%v\n", config.localServer)
+	fmt.Printf("timeShift=%d\n", config.timeShift)
+	if config.debug {
+		fmt.Printf("id=%s\n", config.id)
+		fmt.Printf("key=%s\n", config.key)
+	}
 }
 
 // Print a simple checkpoint message.
