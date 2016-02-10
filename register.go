@@ -19,12 +19,7 @@ import (
 	"time"
 )
 
-const (
-	regRetries   = 1
-	regMSBetween = 10000
-)
-
-// A RoomExit describes an exit out of a GameOn room.
+// A RoomExit describes an exit out of a GameOn! room.
 // Here is an example of a corresponding JSON fragment:
 //  {
 //    "id":"firstroom",
@@ -88,21 +83,21 @@ type RoomRegistrationResp struct {
 	Type  string              `json:"type,omitempty"`
 }
 
-// Registers our room with the gameOn server, with retries on failure.
+// Registers our room with the GameOn! server, with retries on failure.
 func registerWithRetries() (e error) {
 	locus := "REG_W_RETRIES"
-	checkpoint(locus, fmt.Sprintf("retries=%d msBetween=%d", regRetries, regMSBetween))
-	for i := 0; i < regRetries; i++ {
+	checkpoint(locus, fmt.Sprintf("retries=%d secondsBetween=%d", config.retries, config.secondsBetween))
+	for i := 0; i < config.retries; i++ {
 		checkpoint(locus, fmt.Sprintf("Begin attempt %d of %d",
-			i+1, regRetries))
+			i+1, config.retries))
 		e = register()
 		if e == nil {
 			checkpoint(locus, "Registration was successful.")
 			return
 		}
-		checkpoint(locus, fmt.Sprintf("sleeping %d ms.", regMSBetween))
-		if i+1 < regRetries {
-			time.Sleep(regMSBetween * time.Millisecond)
+		checkpoint(locus, fmt.Sprintf("sleeping %d seconds.", config.secondsBetween))
+		if i+1 < config.retries {
+			time.Sleep(time.Duration(config.secondsBetween) * time.Second)
 		}
 	}
 	checkpoint(locus, "Registration failed.")
@@ -210,7 +205,7 @@ func registerOurRoom(client *http.Client) (err error) {
 	ts := makeTimestamp()
 	bodyHash := hash(registration)
 	tokens := []string{config.id, ts, bodyHash}
-	sig := buildHmac(tokens, config.key)
+	sig := buildHmac(tokens, config.secret)
 	var u string
 	if config.localServer {
 		u = fmt.Sprintf("http://%s/map/v1/sites", config.gameonAddr)
@@ -279,8 +274,22 @@ func printRoomRegistrationResp(locus string, r *RoomRegistrationResp) {
 }
 
 // Returns the current time as a UTC-formatted string.
+// If config.timeShift is non-zero, then the timestamp will
+// be shifted by config.timeShift milliseconds. This can be
+// used to slide our registration timestamp closer to the
+// clock on a remote GameOn! server.
 func makeTimestamp() string {
-	return time.Now().UTC().Format(time.RFC3339Nano)
+	if config.timeShift == 0 {
+		return time.Now().UTC().Format(time.RFC3339Nano)
+	}
+	locus := "MAKE.TIMESTAMP"
+	t1 := time.Now()
+	t2 := t1.Add(time.Duration(config.timeShift) * time.Millisecond)
+	ourTime := t1.UTC().Format(time.RFC3339Nano)
+	serverTime := t2.UTC().Format(time.RFC3339Nano)
+	checkpoint(locus, fmt.Sprintf("ourTime    %s", ourTime))
+	checkpoint(locus, fmt.Sprintf("serverTime %s", serverTime))
+	return serverTime
 }
 
 // Generate a JSON string containing our registration info.
