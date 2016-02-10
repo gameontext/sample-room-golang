@@ -24,9 +24,14 @@ func deleteWithRetries() (e error) {
 	for i := 0; i < config.retries; i++ {
 		checkpoint(locus, fmt.Sprintf("Begin attempt %d of %d",
 			i+1, config.retries))
-		e = deleteRoom(client)
+		var stopTrying bool
+		stopTrying, e = deleteRoom(client)
 		if e == nil {
-			checkpoint(locus, "Room deletion was successful.")
+			if stopTrying {
+				checkpoint(locus, "Room deletion failed")
+			} else {
+				checkpoint(locus, "Room deletion was successful.")
+			}
 			return
 		}
 		checkpoint(locus, fmt.Sprintf("sleeping %d seconds.", config.secondsBetween))
@@ -39,7 +44,7 @@ func deleteWithRetries() (e error) {
 	return
 }
 
-func deleteRoom(client *http.Client) (err error) {
+func deleteRoom(client *http.Client) (stopTrying bool, err error) {
 	locus := "DELETE.ROOM"
 	checkpoint(locus, "Begin")
 	ts := makeTimestamp()
@@ -87,10 +92,17 @@ func deleteRoom(client *http.Client) (err error) {
 	case http.StatusNoContent:
 		checkpoint(locus, "Deleted")
 		return
+	case http.StatusForbidden:
+	case http.StatusNotFound:
+		checkpoint(locus, "Sigh. There is no use trying any more.")
+		printResponseBody(resp, body)
+		stopTrying = true
+		return
 	default:
 		err = RegError{fmt.Sprintf("Unhandled Status: %s", resp.Status)}
 		checkpoint(locus, fmt.Sprintf("Unhandled Status=%s", resp.Status))
 		printResponseBody(resp, body)
 		return
 	}
+	return
 }

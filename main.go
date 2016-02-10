@@ -109,33 +109,38 @@ func processCommandline() (err error) {
 		err = ArgError{"Missing Game-on server address."}
 		return
 	}
-	if config.callbackAddr == "" {
-		err = ArgError{"Missing callback address."}
-		return
-	}
-	if config.callbackPort < 0 {
-		err = ArgError{"Missing or invalid callback port."}
-		return
-	}
-	if config.listeningPort < 0 {
-		config.listeningPort = config.callbackPort
-	}
-	if config.roomName == "" {
-		config.roomName = fmt.Sprintf("ROOM.%05d", config.callbackPort)
+	if config.delete == "" {
+		if config.callbackAddr == "" {
+			err = ArgError{"Missing callback address."}
+			return
+		}
+		if config.callbackPort < 0 {
+			err = ArgError{"Missing or invalid callback port."}
+			return
+		}
+		if config.listeningPort < 0 {
+			config.listeningPort = config.callbackPort
+		}
+		if config.roomName == "" {
+			config.roomName = fmt.Sprintf("ROOM.%05d", config.callbackPort)
+		}
 	}
 	return
 }
 
 func printConfig(c *RoomConfig) {
 	fmt.Printf("gameonAddr=%s\n", config.gameonAddr)
-	fmt.Printf("callbackAddr=%s\n", config.callbackAddr)
-	fmt.Printf("callbackPort=%d\n", config.callbackPort)
-	fmt.Printf("listeningPort=%d\n", config.listeningPort)
-	fmt.Printf("roomName=%s\n", config.roomName)
-	fmt.Printf("north=%s\n", config.north)
-	fmt.Printf("south=%s\n", config.south)
-	fmt.Printf("east=%s\n", config.east)
-	fmt.Printf("west=%s\n", config.west)
+	// Many things are useless when we are just doing a delete.
+	if config.delete == "" {
+		fmt.Printf("callbackAddr=%s\n", config.callbackAddr)
+		fmt.Printf("callbackPort=%d\n", config.callbackPort)
+		fmt.Printf("listeningPort=%d\n", config.listeningPort)
+		fmt.Printf("roomName=%s\n", config.roomName)
+		fmt.Printf("north=%s\n", config.north)
+		fmt.Printf("south=%s\n", config.south)
+		fmt.Printf("east=%s\n", config.east)
+		fmt.Printf("west=%s\n", config.west)
+	}
 	fmt.Printf("debug=%v\n", config.debug)
 	fmt.Printf("delete=%v\n", config.delete)
 	fmt.Printf("localServer=%v\n", config.localServer)
