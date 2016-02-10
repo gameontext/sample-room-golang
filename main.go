@@ -46,6 +46,7 @@ type RoomConfig struct {
 	timeShift      int
 	retries        int
 	secondsBetween int
+	delete         string
 }
 
 var config RoomConfig
@@ -60,6 +61,14 @@ func main() {
 		return
 	}
 	printConfig(&config)
+	if config.delete != "" {
+		checkpoint(locus, fmt.Sprintf("deleteWithRetries %s", config.delete))
+		err = deleteWithRetries()
+		if err != nil {
+			checkpoint(locus, fmt.Sprintf("DELETE.FAILED err=%s", err.Error()))
+		}
+		return
+	}
 
 	checkpoint(locus, "registerWithRetries")
 	err = registerWithRetries()
@@ -93,6 +102,7 @@ func processCommandline() (err error) {
 	flag.IntVar(&config.timeShift, "ts", 0, "The number of milleseconds to add or subtract from our timestamp so that we can better match the server clock")
 	flag.IntVar(&config.retries, "retries", 5, "The number of initial registration attempts.")
 	flag.IntVar(&config.secondsBetween, "between", 5, "The number of seconds between registration attempts.")
+	flag.StringVar(&config.delete, "delete", "", "Delete the room with this id and exit.")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
@@ -127,6 +137,7 @@ func printConfig(c *RoomConfig) {
 	fmt.Printf("east=%s\n", config.east)
 	fmt.Printf("west=%s\n", config.west)
 	fmt.Printf("debug=%v\n", config.debug)
+	fmt.Printf("delete=%v\n", config.delete)
 	fmt.Printf("localServer=%v\n", config.localServer)
 	fmt.Printf("timeShift=%d\n", config.timeShift)
 	if config.debug {
