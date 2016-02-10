@@ -27,7 +27,7 @@ To build a Game On! room in Bluemix, you will first need a Bluemix account.
 ### Sign up and log into Bluemix and DevOps
 Sign up for Bluemix at https://console.ng.bluemix.net and DevOps Services at https://hub.jazz.net. When you sign up, you'll create an IBM ID, create an alias, and register with Bluemix.
 
-## Get Game On! Id and Shared Secret
+## Get Game On! ID and Shared Secret
 For a new room to register with the Game-On server, you must first log into game-on.org and sign in using one of several methods to get your **Game On! Id** and **Shared Secret**.
 
 1.  Go to [https://game-on.org/](https://game-on.org/) and click **Play**
@@ -51,57 +51,35 @@ Our container will be expecting its parameters in the form of environment variab
 - **ROOM_NAME** Set this to the name of your room.
 
 ## Make sure a public IP is available in your Bluemix space
-This solution requires a free public IP. In order to determine if a public IP is available, you need to find the number of used and your max quota of IP addresses allowed for your space.
+This solution, when using Containers, requires a free public IP address. In order to determine if a public IP is available, you need to find the number of used and your max quota of IP addresses allowed for your space.
 
 To find this information:
 
 1. Log into Bluemix at https://console.ng.bluemix.net.
 2. Select **DASHBOARD**.
-3. Select the space you where you would like your Wish List app to run.
+3. Select the space you where you would like your Game On! room to run.
 4. In the Containers tile, information about your IP addresses is listed.
 5. Check that the **Public IPs Requested** field has at least one available IP address.
 
-If you have an IP address available, you're ready to start building your Wish List app. If all of your IP addresses have been used, you will need to release one. In order to release a public IP, install the [IBM Containers CLI](https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs) plugin, which can be found at the website below.
+If you have an IP address available, you can request a new IP or use an existing available IP to start building your Game On! room. If all of your IP addresses have been used, you will need to release one. In either case, to manage your public IP addresses, install the CF IC plugin, which can be found at the website below.
 
-https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs
+[https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs](https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs)
 
 Once installed:
 
 1. Log into your Bluemix account and space.
 
-   `cf login`
-2. Log into Cloud Foundry for IBM Containers.
+  `cf ic login`  
+2. List your current external IP addresses.
 
-   `cf ic login`
-3. List your current external IP addresses.
+  `cf ic ip list`
+3. If the list of external IP addresses contains an unused address, you can use that one for this solution.
+4. If you are not at your limit of IP addresses and want a new one, request an IP address.
 
-   `cf ic ip list`
+  `cf ic ip request`
+5. If you need to make an IP address available, release an IP address currently in use.
 
-4. If `cf ic ip list` shows a free public IP address, such as 134.168.7.222 in the listing below, then make note of that IP address so we can bind it to our container later. If there is no free address, then proceed to step 5.
-
-   ```
-   cf ic ip list
-   IpAddress        ContainerId
-   134.168.11.124   99413506-9f8f-4b1f-9968-f572b10b6e17
-   134.168.7.222
-   ```
-
-5. If `cf ic ip list` shows that all of your public IP addresses are in use, then you must release an IP address. Make note of that IP address so we can bind it to our container later. If you choose not to release a bound IP address, or if no IP addresses show up at all, then proceed to step 6.
-
-   ```
-   cf ic ip list
-   IpAddress        ContainerId
-   134.168.11.124   99413506-9f8f-275f-9968-f572b10b6e17
-   134.168.7.222    32ef3506-eaf2-4b1f-e827-5de3fae5b58d
-   ```
-
-   `cf ic ip release 134.168.7.222`
-
-6. If `cf ic ip list` shows no allocated IP addresses, or if you wish to allocate a new IP address rather than release an existing one, then you must request a new IP address. If the request is successful, make note of the new IP address so we can bind it to our container later.
-
-   `cf ic ip request`
-
-
+  `cf ic ip release <public IP>`  
 ## Game On! room in a Container
 To build a Game On! room in a container, first create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
 
