@@ -32,8 +32,8 @@ For a new room to register with the Game-On server, you must first log into game
 
 1.	Go to [https://game-on.org/](https://game-on.org/) and click **Play**
 2.	Select any authentication method to log in with your username and password for that type.
-3.	Click the **Edit Profile** button(the person icon) at the top right.
-4.	You should now see **Game On! Id** and **Shared Secret** near the bottom of the page.  You may need to refresh the page to generate **Shared Secret**.  You will need to make note of your **Game On! Id** and **Shared Secret** for later in the walkthrough.
+3.	Click the **Edit Profile** button (the person icon) at the top right.
+4.	You should now see **Game On! Id** and **Shared Secret** near the bottom of the page.  (If necessary, refresh the page, or even log out and log back in, to generate your **Shared Secret**).  Please make note of your **Game On! Id** and **Shared Secret** for later in the walkthrough.
 
 ## Getting the source code
 
@@ -102,20 +102,47 @@ Once installed:
 
 
 ## Game On! room in a Container
-To build a Game On! room in a container, you create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
+To build a Game On! room in a container, first create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
 
 ###Build the Docker container locally
 1.	Start Docker to run Docker commands. e.g. with the Docker QuickStart Terminal.
-2.	In the gameon-room-go folder, build the container using run `docker build -t registry.ng.bluemix.net/<your_namespace>/<imageName> .`  For example, `docker build -t registry.ng.bluemix.net/mystuff/go-room:1.0 .`
+
+2.	In the gameon-room-go folder, build the container using the docker build command:
+
+        `docker build -t registry.ng.bluemix.net/<your_namespace>/<imageName> .`
+
+        For example,
+
+        `docker build -t registry.ng.bluemix.net/mystuff/go-room:1.0 .`
+
+        Note the dot ('.') at the end of the command. It is represents the current directory and should not be omitted.
+
 3.	To verify the image is now created, you can run `docker images`
 
 ###Push your container to your Bluemix container registry
 1.	Make sure you are logged in with the `cf ic login` command.
-2.	Push the container to Bluemix using the command `docker push registry.ng.bluemix.net/<your_namespace>/<imageName>` using the same image name you used to create the local container. For example, `docker push registry.ng.bluemix.net/mystuff/go-room:1.0 .`
+
+2.	Push the container to Bluemix using the docker push command:
+
+        `docker push registry.ng.bluemix.net/<your_namespace>/<imageName>`
+
+        Use the same image name you used to create the local container. For example,
+
+        `docker push registry.ng.bluemix.net/mystuff/go-room:1.0`
 
 ###Run the container on Bluemix
-1.      Our container uses a startup script which is driven by environment variables. Edit example-container.env and change the environment variable to suit your needs as we will be using this to pass our enviroment variable settings to the container. See the commentary in container-startup.sh and example-container.env for additional details.
+1.      Our container uses a startup script which is driven by environment variables. Edit example-container.env and change the environment variable to suit your needs as we will be using this to pass our enviroment variable settings to the container.
+
+See the commentary in container-startup.sh and example-container.env for additional details.
+
 2.	Use the following command to run the container, using the same image name you used to create the local container.
-	`cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/<your_namespace>/<imageName>` (or, to stay with our previous example, `cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/mystuff/go-room:1.0`)
+
+	`cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/<your_namespace>/<imageName>`
+
+        Or, to stay with our previous example,
+
+       `cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/mystuff/go-room:1.0`
+
 3.	With the resulting container ID, use that value to bind to the IP you got earlier with the command:
+
 	`cf ic ip bind <IP> <Container ID>`
