@@ -27,13 +27,13 @@ To build a Game On! room in Bluemix, you will first need a Bluemix account.
 ### Sign up and log into Bluemix and DevOps
 Sign up for Bluemix at https://console.ng.bluemix.net and DevOps Services at https://hub.jazz.net. When you sign up, you'll create an IBM ID, create an alias, and register with Bluemix.
 
-## Get Game On! API Key and User ID
-For a new room to register with the Game-On server, you must first log into game-on.org and sign in using one of several methods to get your game-on user ID and ApiKey.
+## Get Game On! Id and Shared Secret
+For a new room to register with the Game-On server, you must first log into game-on.org and sign in using one of several methods to get your **Game On! Id** and **Shared Secret**.
 
 1.	Go to [https://game-on.org/](https://game-on.org/) and click **Play**
 2.	Select any authentication method to log in with your username and password for that type.
 3.	Click the **Edit Profile** button(the person icon) at the top right.
-4.	You should now see the ID and API key at the bottom of the page.  You may need to refresh the page to generate the API key.  You will need to make note of your API key for later in the walkthrough.
+4.	You should now see **Game On! Id** and **Shared Secret** near the bottom of the page.  You may need to refresh the page to generate **Shared Secret**.  You will need to make note of your **Game On! Id** and **Shared Secret** for later in the walkthrough.
 
 ## Getting the source code
 
@@ -46,9 +46,9 @@ Alternatively you can use the GitHub CLI to clone the repository with
 Our container will be expecting its parameters in the form of environment variables passed to it as part the docker run command. An example env file, example-container.env, has been provided and you must edit it to customize your settings. The file itself and container-startup.sh contain commentary regarding each of the environment variables, but in particular you will probably need to edit the following important settings:
 
 - **CONTAINER_IP** This must be set to an available Bluemix public IP address.  You will be given instructions on getting this address in a following section.
-- **GAMEON_ID=** This is the **Game On!** provided by the server after you login using your browser. (Click on the player icon in the upper right corner of the web page after logging in.)
+- **GAMEON_ID** This is the **Game On! Id** provided by the server after you login using your browser. (Click on the player icon in the upper right corner of the web page after logging in.)
 - **GAMEON_SECRET** This is the **Shared Secret** provided by the server after you login using your browser. (Click on the player icon in the upper right corner of the web page after logging in.)
-- **ROOM_NAME=MyRoom** Set this to the name of your room.
+- **ROOM_NAME** Set this to the name of your room.
 
 ## Make sure a public IP is available in your Bluemix space
 This solution requires a free public IP. In order to determine if a public IP is available, you need to find the number of used and your max quota of IP addresses allowed for your space.
