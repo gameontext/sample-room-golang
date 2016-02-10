@@ -38,12 +38,14 @@ type RoomConfig struct {
 	// if you logged in using your Google ID:
 	// 'google:132043241444397884152'
 	id string
-	// This is the secret key that was obtained during your GameOn!
+	// This is the shared secret that was obtained during your GameOn!
 	// browser login. If you logged in using your Google ID it might
 	// look like this: 'LNIkaoiu62addlGp/rCZc7g,n3s9jUtOpXErr062kos='
-	key         string
-	localServer bool
-	timeShift   int
+	secret         string
+	localServer    bool
+	timeShift      int
+	retries        int
+	secondsBetween int
 }
 
 var config RoomConfig
@@ -85,10 +87,12 @@ func processCommandline() (err error) {
 	flag.StringVar(&config.west, "west", "An old swinging door leads west.", "Describes our western door")
 	flag.StringVar(&config.up, "up", "There is a rickety set of steps leading up.", "GameOn! often ignores this door")
 	flag.StringVar(&config.down, "down", "Heat eminates from an opening in the floor.", "GameOn! often ignores this door")
-	flag.StringVar(&config.id, "id", "", "The id associated with our key.")
-	flag.StringVar(&config.key, "key", localSecret, "Our secret key.")
+	flag.StringVar(&config.id, "id", "", "The id associated with our shared secret.")
+	flag.StringVar(&config.secret, "secret", localSecret, "Our shared secret.")
 	flag.BoolVar(&config.localServer, "local", false, "We are using a local server. Local servers expect http://; remote servers expect https://")
 	flag.IntVar(&config.timeShift, "ts", 0, "The number of milleseconds to add or subtract from our timestamp so that we can better match the server clock")
+	flag.IntVar(&config.retries, "retries", 5, "The number of initial registration attempts.")
+	flag.IntVar(&config.secondsBetween, "between", 5, "The number of seconds between registration attempts.")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
@@ -127,7 +131,7 @@ func printConfig(c *RoomConfig) {
 	fmt.Printf("timeShift=%d\n", config.timeShift)
 	if config.debug {
 		fmt.Printf("id=%s\n", config.id)
-		fmt.Printf("key=%s\n", config.key)
+		fmt.Printf("secret=%s\n", config.secret)
 	}
 }
 

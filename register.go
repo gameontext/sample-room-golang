@@ -19,11 +19,6 @@ import (
 	"time"
 )
 
-const (
-	regRetries   = 1
-	regMSBetween = 10000
-)
-
 // A RoomExit describes an exit out of a GameOn! room.
 // Here is an example of a corresponding JSON fragment:
 //  {
@@ -91,18 +86,18 @@ type RoomRegistrationResp struct {
 // Registers our room with the GameOn! server, with retries on failure.
 func registerWithRetries() (e error) {
 	locus := "REG_W_RETRIES"
-	checkpoint(locus, fmt.Sprintf("retries=%d msBetween=%d", regRetries, regMSBetween))
-	for i := 0; i < regRetries; i++ {
+	checkpoint(locus, fmt.Sprintf("retries=%d secondsBetween=%d", config.retries, config.secondsBetween))
+	for i := 0; i < config.retries; i++ {
 		checkpoint(locus, fmt.Sprintf("Begin attempt %d of %d",
-			i+1, regRetries))
+			i+1, config.retries))
 		e = register()
 		if e == nil {
 			checkpoint(locus, "Registration was successful.")
 			return
 		}
-		checkpoint(locus, fmt.Sprintf("sleeping %d ms.", regMSBetween))
-		if i+1 < regRetries {
-			time.Sleep(regMSBetween * time.Millisecond)
+		checkpoint(locus, fmt.Sprintf("sleeping %d seconds.", config.secondsBetween))
+		if i+1 < config.retries {
+			time.Sleep(time.Duration(config.secondsBetween) * time.Second)
 		}
 	}
 	checkpoint(locus, "Registration failed.")
@@ -210,7 +205,7 @@ func registerOurRoom(client *http.Client) (err error) {
 	ts := makeTimestamp()
 	bodyHash := hash(registration)
 	tokens := []string{config.id, ts, bodyHash}
-	sig := buildHmac(tokens, config.key)
+	sig := buildHmac(tokens, config.secret)
 	var u string
 	if config.localServer {
 		u = fmt.Sprintf("http://%s/map/v1/sites", config.gameonAddr)
