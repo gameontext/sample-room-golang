@@ -64,6 +64,7 @@ type ExitGroup struct {
 
 type RoomRegistrationReq struct {
 	Name              string      `json:"name,omitempty"`
+	FullName          string      `json:"fullName,omitempty"`
 	ConnectionDetails ConnDetails `json:"connectionDetails,omitempty"`
 	Doors             DoorGroup   `json:"doors,omitempty"`
 }
@@ -105,7 +106,7 @@ func registerWithRetries() (e error) {
 	return
 }
 
-// Registers our room with the game-on server if it is not
+// Registers our room with the game-on server if the room is not
 // already registered.
 func register() (err error) {
 	locus := "REG"
@@ -296,6 +297,7 @@ func makeTimestamp() string {
 func genRegistration() (rs string, err error) {
 	var reg RoomRegistrationReq
 	reg.Name = config.roomName
+	reg.FullName = config.roomName
 	reg.Doors.North = config.north
 	reg.Doors.South = config.south
 	reg.Doors.East = config.east
