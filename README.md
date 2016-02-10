@@ -122,18 +122,22 @@ To build a Game On! room in a container, first create the container locally in D
 ###Push your container to your Bluemix container registry
 1.	Make sure you are logged in with the `cf ic login` command.
 
-2.	Push the container to Bluemix using the docker push command:
+2.	Push the container to Bluemix using the `docker push` command:
 
-        `docker push registry.ng.bluemix.net/<your_namespace>/<imageName>`
+ `
+docker push registry.ng.bluemix.net/<your_namespace>/<imageName>
+`
 
-        Use the same image name you used to create the local container. For example,
+ Use the same image name you used to create the local container. For example,
 
-        `docker push registry.ng.bluemix.net/mystuff/go-room:1.0`
+ `
+docker push registry.ng.bluemix.net/mystuff/go-room:1.0
+`
 
 ###Run the container on Bluemix
 1.      Our container uses a startup script which is driven by environment variables. Edit example-container.env and change the environment variable to suit your needs as we will be using this to pass our enviroment variable settings to the container.
 
-See the commentary in container-startup.sh and example-container.env for additional details.
+ See the commentary in container-startup.sh and example-container.env for additional details.
 
 2.	Use the following command to run the container, using the same image name you used to create the local container.
 
