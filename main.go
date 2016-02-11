@@ -46,7 +46,7 @@ type RoomConfig struct {
 	timeShift      int
 	retries        int
 	secondsBetween int
-	delete         string
+	roomToDelete   string
 }
 
 var config RoomConfig
@@ -61,8 +61,8 @@ func main() {
 		return
 	}
 	printConfig(&config)
-	if config.delete != "" {
-		checkpoint(locus, fmt.Sprintf("deleteWithRetries %s", config.delete))
+	if config.roomToDelete != "" {
+		checkpoint(locus, fmt.Sprintf("deleteWithRetries %s", config.roomToDelete))
 		err = deleteWithRetries()
 		if err != nil {
 			checkpoint(locus, fmt.Sprintf("DELETE.FAILED err=%s", err.Error()))
@@ -102,14 +102,14 @@ func processCommandline() (err error) {
 	flag.IntVar(&config.timeShift, "ts", 0, "The number of milleseconds to add or subtract from our timestamp so that we can better match the server clock")
 	flag.IntVar(&config.retries, "retries", 5, "The number of initial registration attempts.")
 	flag.IntVar(&config.secondsBetween, "between", 5, "The number of seconds between registration attempts.")
-	flag.StringVar(&config.delete, "delete", "", "Delete the room with this id and exit.")
+	flag.StringVar(&config.roomToDelete, "delete", "", "Delete the room with this id and exit.")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
 		err = ArgError{"Missing Game-on server address."}
 		return
 	}
-	if config.delete == "" {
+	if config.roomToDelete == "" {
 		if config.callbackAddr == "" {
 			err = ArgError{"Missing callback address."}
 			return
@@ -131,7 +131,7 @@ func processCommandline() (err error) {
 func printConfig(c *RoomConfig) {
 	fmt.Printf("gameonAddr=%s\n", config.gameonAddr)
 	// Many things are useless when we are just doing a delete.
-	if config.delete == "" {
+	if config.roomToDelete == "" {
 		fmt.Printf("callbackAddr=%s\n", config.callbackAddr)
 		fmt.Printf("callbackPort=%d\n", config.callbackPort)
 		fmt.Printf("listeningPort=%d\n", config.listeningPort)
@@ -142,7 +142,7 @@ func printConfig(c *RoomConfig) {
 		fmt.Printf("west=%s\n", config.west)
 	}
 	fmt.Printf("debug=%v\n", config.debug)
-	fmt.Printf("delete=%v\n", config.delete)
+	fmt.Printf("roomToDelete=%v\n", config.roomToDelete)
 	fmt.Printf("localServer=%v\n", config.localServer)
 	fmt.Printf("timeShift=%d\n", config.timeShift)
 	if config.debug {

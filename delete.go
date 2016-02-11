@@ -49,13 +49,13 @@ func deleteRoom(client *http.Client) (stopTrying bool, err error) {
 	checkpoint(locus, "Begin")
 	ts := makeTimestamp()
 	bodyHash := hash("")
-	tokens := []string{config.id, ts} //, bodyHash}
+	tokens := []string{config.id, ts}
 	sig := buildHmac(tokens, config.secret)
 	var u string
 	if config.localServer {
-		u = fmt.Sprintf("http://%s/map/v1/sites/%s", config.gameonAddr, config.delete)
+		u = fmt.Sprintf("http://%s/map/v1/sites/%s", config.gameonAddr, config.roomToDelete)
 	} else {
-		u = fmt.Sprintf("https://%s/map/v1/sites/%s", config.gameonAddr, config.delete)
+		u = fmt.Sprintf("https://%s/map/v1/sites/%s", config.gameonAddr, config.roomToDelete)
 	}
 
 	checkpoint(locus, fmt.Sprintf("URL %s", u))
