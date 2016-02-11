@@ -19,7 +19,7 @@ type LocationResponse struct {
 }
 
 // Exits our room if the player requests a supported exit.
-func exitRoom(conn *websocket.Conn, req *GameonRequest, tail string) error {
+func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	locus := "EXITROOM"
 	// Content must be of the form "/go direction" or "/exit direction"
 	// where direction is a valid exit.

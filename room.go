@@ -21,13 +21,13 @@ const (
 // must contain a non-empty Content field. If the Content field
 // begins with a slash ("/") then the request is treated as a
 // room command, otherwise it is treated as a chat request.
-func handleRoom(conn *websocket.Conn, req *GameonRequest) error {
+func handleRoom(conn *websocket.Conn, req *GameonRequest, room string) error {
 	content := req.Content
 	if len(content) < 1 {
 		return JSPayloadError{"There is no content."}
 	}
 	if 0 == strings.Index(content, "/") {
-		return handleSlashCommand(conn, req)
+		return handleSlashCommand(conn, req, room)
 	}
 	return handleChat(conn, req)
 }
@@ -49,7 +49,7 @@ var slashCommands = []string{"/" + slashExamine, "/" + slashExit, "/" + slashGo,
 
 // Recognizes and dispatches a room slash command. Nil is returned
 // if all goes well, otherwise an error is returned.
-func handleSlashCommand(conn *websocket.Conn, req *GameonRequest) error {
+func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) error {
 	locus := "HANDLE.SLASH"
 	cmd, tail, err := parseCommandPrefix(req.Content)
 	if err != nil {
@@ -58,15 +58,15 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest) error {
 	checkpoint(locus, fmt.Sprintf("cmd=%s tail=%s", cmd, tail))
 	switch cmd {
 	case slashGo, slashExit:
-		return exitRoom(conn, req, tail)
+		return exitRoom(conn, req, tail, room)
 	case slashLook:
-		return lookAroundRoom(conn, req, tail)
+		return lookAroundRoom(conn, req, tail, room)
 	case slashHelp:
-		return helpCommand(conn, req, tail)
+		return helpCommand(conn, req, tail, room)
 	case slashInventory:
-		return checkInventory(conn, req, tail)
+		return checkInventory(conn, req, tail, room)
 	case slashExamine:
-		return examineObject(conn, req, tail)
+		return examineObject(conn, req, tail, room)
 	default:
 		return JSPayloadError{fmt.Sprintf("Unrecognized command: '%s'", cmd)}
 	}

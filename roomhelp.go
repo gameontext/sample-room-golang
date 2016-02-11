@@ -18,9 +18,10 @@ type HelpResponse struct {
 	Bookmark int               `json:"bookmark,omitempty"`
 }
 
-func helpCommand(conn *websocket.Conn, req *GameonRequest, tail string) error {
+func helpCommand(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	var resp HelpResponse
-	m := fmt.Sprintf("This room understands the following commands: %s.",
+	m := fmt.Sprintf("%s understands the following commands: %s.",
+		MyRooms[room],
 		strings.Join(slashCommands, ", "))
 	resp.Rtype = "event"
 	resp.Content = make(map[string]string)

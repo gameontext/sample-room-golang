@@ -84,11 +84,11 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 
 		switch cmd {
 		case "roomHello":
-			err = handleHello(conn, &req)
+			err = handleHello(conn, &req, room)
 		case "roomGoodbye":
-			err = handleGoodbye(conn, &req)
+			err = handleGoodbye(conn, &req, room)
 		case "room":
-			err = handleRoom(conn, &req)
+			err = handleRoom(conn, &req, room)
 		default:
 			err = handleInvalidMessage(conn, payload)
 		}

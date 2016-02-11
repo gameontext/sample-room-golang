@@ -26,7 +26,7 @@ var cheekyLookRemarks = []TimedText{
 	{2000, "Looking around is useless in an unlighted room."},
 }
 
-func lookAroundRoom(conn *websocket.Conn, req *GameonRequest, tail string) error {
+func lookAroundRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	locus := "LOOK"
 	checkpoint(locus, "AROUND")
 	for _, tt := range cheekyLookRemarks {

@@ -33,7 +33,7 @@ var cheekyInventoryRemarks = []TimedText{
 	{2000, "(Enough, apparently. Your pockets are now empty.)"},
 }
 
-func checkInventory(conn *websocket.Conn, req *GameonRequest, tail string) error {
+func checkInventory(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	for _, tt := range cheekyInventoryRemarks {
 		var resp ExaminationResponse
 		resp.Rtype = "event"

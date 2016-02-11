@@ -24,15 +24,15 @@ type HelloResponse struct {
 // example: "Room 3100",{"username": "ebullient","userId": "github:808713"}
 //
 // Return an error if a problem occurs, otherwise return nil.
-func handleHello(conn *websocket.Conn, req *GameonRequest) (e error) {
+func handleHello(conn *websocket.Conn, req *GameonRequest, room string) (e error) {
 	checkpoint("HELLO", fmt.Sprintf("room=%s userid=%s username=%s\n",
 		config.roomName, req.UserId, req.Username))
 
 	// Announce to the room and the player that the player has entered
 	// the room. Ignore errors for this.
 	mUser := fmt.Sprintf("Welcome to %s, %s. Take your time. Look around.",
-		config.roomName, req.Username)
-	mRoom := fmt.Sprintf("%s has entered %s.", req.Username, config.roomName)
+		MyRooms[room], req.Username)
+	mRoom := fmt.Sprintf("%s has entered %s.", req.Username, MyRooms[room])
 	sendMessageToRoom(conn, mRoom, mUser, req.UserId)
 
 	// Send back the required response. Do not ignore these errors.
@@ -40,7 +40,7 @@ func handleHello(conn *websocket.Conn, req *GameonRequest) (e error) {
 	var j []byte
 	resp.Rtype = "location"
 	resp.Name = config.roomName
-	resp.Description = fmt.Sprintf("This is %s", config.roomName)
+	resp.Description = fmt.Sprintf("This is %s", MyRooms[room])
 	j, e = json.MarshalIndent(resp, "", "    ")
 	if e != nil {
 		return

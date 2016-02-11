@@ -95,13 +95,13 @@ func deleteRoom(client *http.Client) (stopTrying bool, err error) {
 	case http.StatusForbidden:
 	case http.StatusNotFound:
 		checkpoint(locus, "Sigh. There is no use trying any more.")
-		printResponseBody(resp, body)
+		printResponseBody(locus, resp, body)
 		stopTrying = true
 		return
 	default:
 		err = RegError{fmt.Sprintf("Unhandled Status: %s", resp.Status)}
 		checkpoint(locus, fmt.Sprintf("Unhandled Status=%s", resp.Status))
-		printResponseBody(resp, body)
+		printResponseBody(locus, resp, body)
 		return
 	}
 	return

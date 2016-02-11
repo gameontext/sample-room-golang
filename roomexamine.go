@@ -17,12 +17,12 @@ type ExaminationResponse struct {
 	Bookmark int               `json:"bookmark,omitempty"`
 }
 
-func examineObject(conn *websocket.Conn, req *GameonRequest, tail string) error {
+func examineObject(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	var resp ExaminationResponse
 	resp.Rtype = "event"
 	resp.Content = make(map[string]string)
 	resp.Content[req.UserId] = fmt.Sprintf("There is nothing here in %s. Keep moving.",
-		config.roomName)
+		MyRooms[room])
 	j, err := json.MarshalIndent(resp, "", "    ")
 	if err != nil {
 		return err

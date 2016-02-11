@@ -15,3 +15,10 @@ package main
 //    is currently at https://golang.org/pkg/encoding/json/ . You
 //    should ready the documentation for the Marshall function
 //    carefully.
+//
+// 3. Some JSON responses have more information than we
+//    need, so we only define marshalling for the fields we
+//    care about. See RoomRegistrationResp for an example
+//    of a struct designed to keep a subset of the information
+//    returned in a response. (We do not need exits or coords
+//    so we do not map those fields.)

@@ -19,21 +19,6 @@ import (
 	"time"
 )
 
-// A RoomExit describes an exit out of a GameOn! room.
-// Here is an example of a corresponding JSON fragment:
-//  {
-//    "id":"firstroom",
-//    "name":"First Room",
-//    "fullName":"The First Room",
-//    "door":"A warped wooden door with a friendly face branded on the corner"
-//  }
-type RoomExit struct {
-	Id       string `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	FullName string `json:"fullName,omitempty"`
-	Door     string `json:"door,omitempty"`
-}
-
 type ConnDetails struct {
 	Type   string `json:"type,omitempty"`
 	Target string `json:"target,omitempty"`
@@ -50,17 +35,6 @@ type DoorGroup struct {
 	Down string `json:"d,omitempty"`
 }
 
-// Exit information, which we receive as part of a room regstration response,
-// is currently kept in a struct. Consider using a map.
-type ExitGroup struct {
-	North RoomExit `json:"n,omitempty"`
-	South RoomExit `json:"s,omitempty"`
-	East  RoomExit `json:"e,omitempty"`
-	West  RoomExit `json:"w,omitempty"`
-	Up    RoomExit `json:"u,omitempty"`
-	Down  RoomExit `json:"d,omitempty"`
-}
-
 type RoomRegistrationReq struct {
 	Name              string      `json:"name,omitempty"`
 	FullName          string      `json:"fullName,omitempty"`
@@ -68,18 +42,11 @@ type RoomRegistrationReq struct {
 	Doors             DoorGroup   `json:"doors,omitempty"`
 }
 
-type RoomCoord struct {
-	X int `json:x,omitempty`
-	Y int `json:y,omitempty`
-}
-
 type RoomRegistrationResp struct {
 	Id    string              `json:"_id,omitempty"`
 	Rev   string              `json:"_rev,omitempty"`
 	Owner string              `json:"owner,omitempty"`
 	Info  RoomRegistrationReq `json:"info,omitempty"`
-	Exits ExitGroup           `json:"exits,omitempty"`
-	Coord RoomCoord           `json:"coord,omitempty`
 	Type  string              `json:"type,omitempty"`
 }
 
@@ -93,6 +60,7 @@ func registerWithRetries() (e error) {
 		e = register()
 		if e == nil {
 			checkpoint(locus, "Registration was successful.")
+			rememberMyRooms()
 			return
 		}
 		checkpoint(locus, fmt.Sprintf("sleeping %d seconds.", config.secondsBetween))
@@ -165,7 +133,7 @@ func checkForPriorRegistration(client *http.Client) (registered bool, err error)
 	case http.StatusOK:
 		checkpoint(locus, "AlreadyRegistered")
 		registered = true
-		traceResponseBody(resp, body)
+		traceResponseBody(locus, resp, body)
 		if config.debug {
 			// We expect a one element array from our query.
 			// Do not propagate any errors from this debug logging.
@@ -183,11 +151,11 @@ func checkForPriorRegistration(client *http.Client) (registered bool, err error)
 		return
 	case http.StatusNoContent:
 		checkpoint(locus, "NotCurrentlyRegistered")
-		traceResponseBody(resp, body)
+		traceResponseBody(locus, resp, body)
 		return
 	default:
 		checkpoint(locus, "UnsupportedStatusCode")
-		printResponseBody(resp, body)
+		printResponseBody(locus, resp, body)
 		return
 	}
 }
@@ -256,12 +224,12 @@ func registerOurRoom(client *http.Client) (err error) {
 	case http.StatusConflict:
 		err = RegError{fmt.Sprintf("Bad status: %s", resp.Status)}
 		checkpoint(locus, fmt.Sprintf("Internal Error. Attempt to reregister. Status=%s", resp.Status))
-		printResponseBody(resp, body)
+		printResponseBody(locus, resp, body)
 		return
 	default:
 		err = RegError{fmt.Sprintf("Unhandled Status: %s", resp.Status)}
 		checkpoint(locus, fmt.Sprintf("Unhandled Status=%s", resp.Status))
-		printResponseBody(resp, body)
+		printResponseBody(locus, resp, body)
 		return
 	}
 }
@@ -269,7 +237,7 @@ func registerOurRoom(client *http.Client) (err error) {
 func printRoomRegistrationResp(locus string, r *RoomRegistrationResp) {
 	j, err := json.MarshalIndent(r, "", "    ")
 	if err == nil {
-		fmt.Printf("\n%s\n%s", locus, string(j))
+		fmt.Printf("\n%s\n%s\n", locus, string(j))
 	}
 }
 
@@ -297,12 +265,16 @@ func genRegistration() (rs string, err error) {
 	var reg RoomRegistrationReq
 	reg.Name = config.roomName
 	reg.FullName = config.roomName
-	reg.Doors.North = config.north
-	reg.Doors.South = config.south
-	reg.Doors.East = config.east
-	reg.Doors.West = config.west
-	reg.Doors.Up = config.up
-	reg.Doors.Down = config.down
+	// Door descriptions are collected from an inside-looking-out
+	// perspective, but Game On! wants a description from the
+	// connecting room's point of view. So, our commandline
+	// North is what GameOn! wants for the South.
+	reg.Doors.North = config.south
+	reg.Doors.South = config.north
+	reg.Doors.East = config.west
+	reg.Doors.West = config.east
+	reg.Doors.Up = config.down
+	reg.Doors.Down = config.up
 	reg.ConnectionDetails.Type = "websocket"
 	reg.ConnectionDetails.Target = fmt.Sprintf("ws://%s:%d",
 		config.callbackAddr, config.callbackPort)
@@ -316,20 +288,20 @@ func genRegistration() (rs string, err error) {
 
 // Conditionally print an http.Response body string
 // if config.debug is true.
-func traceResponseBody(r *http.Response, body string) {
+func traceResponseBody(locus string, r *http.Response, body string) {
 	if config.debug {
-		printResponseBody(r, body)
+		printResponseBody(locus, r, body)
 	}
 }
 
 // Unconditionally print an http.Response body string.
-func printResponseBody(r *http.Response, body string) {
-	fmt.Printf("RESP.StatusCode=%s\n", r.Status)
+func printResponseBody(locus string, r *http.Response, body string) {
+	fmt.Printf("\n%s.RESP.StatusCode=%s\n", locus, r.Status)
 	if r.StatusCode == http.StatusNotFound {
 		// Avoid the noise.
 		return
 	}
-	fmt.Printf("RESP.Body='%s'\n", body)
+	fmt.Printf("%s.RESP.Body='%s'\n", locus, body)
 }
 
 // We stash our room registration response in rememberedRegistration
@@ -380,4 +352,63 @@ func buildHmac(tokens []string, secret string) string {
 	}
 	h.Write([]byte(s))
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+type RoomQueryResp struct {
+	Id    string              `json:"_id,omitempty"`
+	Owner string              `json:"owner,omitempty"`
+	Info  RoomRegistrationReq `json:"info,omitempty"`
+}
+
+var MyRooms map[string]string
+
+func rememberMyRooms() (err error) {
+	locus := "REG.LISTMYROOMS"
+	MyRooms = make(map[string]string)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	u := fmt.Sprintf("http://%s/map/v1/sites?owner=%s", config.gameonAddr, config.id)
+	checkpoint(locus, u)
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		checkpoint(locus, fmt.Sprintf("NewRequest.Error err=%s", err.Error()))
+		return
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		checkpoint(locus, fmt.Sprintf("Get.Error err=%s", err.Error()))
+		return
+	}
+	body, err := extractBody(resp)
+	if err != nil {
+		checkpoint(locus, fmt.Sprintf("Body.Error err=%s", err.Error()))
+		return
+	}
+	switch resp.StatusCode {
+	case http.StatusOK:
+		var qr [25]RoomQueryResp
+		e := json.Unmarshal([]byte(body), &qr)
+		if e != nil {
+			fmt.Printf("%s: JSON unmarshalling error: %s\n",
+				locus, e.Error())
+			fmt.Printf("%s : Offending JSON: %s\n", locus, body)
+			return
+		}
+		for _, r := range qr {
+			if len(r.Id) > 0 {
+				MyRooms[r.Id] = r.Info.FullName
+			}
+		}
+		if config.debug {
+			for k, v := range MyRooms {
+				fmt.Printf("%s --> %s\n", k, v)
+			}
+		}
+		return
+	default:
+		checkpoint(locus, "FAILED.")
+	}
+	return
 }

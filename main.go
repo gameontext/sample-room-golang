@@ -153,5 +153,5 @@ func printConfig(c *RoomConfig) {
 
 // Print a simple checkpoint message.
 func checkpoint(locus, s string) {
-	fmt.Printf("\nCHECKPOINT: %s.%s\n", locus, s)
+	fmt.Printf("CHECKPOINT: %s.%s\n", locus, s)
 }
