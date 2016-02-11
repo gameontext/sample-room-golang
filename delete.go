@@ -92,6 +92,7 @@ func deleteRoom(client *http.Client) (stopTrying bool, err error) {
 	case http.StatusNoContent:
 		checkpoint(locus, "Deleted")
 		return
+	case http.StatusOK:
 	case http.StatusForbidden:
 	case http.StatusNotFound:
 		checkpoint(locus, "Sigh. There is no use trying any more.")
