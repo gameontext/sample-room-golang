@@ -7,10 +7,11 @@ package main
 
 // JSON Marshalling Notes
 //
-// All marshalling is performed using json.MarshalIndent so
-// that any JSON we log is formatted nicely.
-// The additional tagging that we use to annotate our Go
-// struct types is explained in the Go json documentation, which
-// is currently at https://golang.org/pkg/encoding/json/ . You
-// should ready the documentation for the Marshall function
-// carefully.
+// 1. All marshalling is performed using json.MarshalIndent so
+//    that any JSON we log is formatted nicely.
+//
+// 2. The additional tagging that we use to annotate our Go
+//    struct types is explained in the Go json documentation, which
+//    is currently at https://golang.org/pkg/encoding/json/ . You
+//    should ready the documentation for the Marshall function
+//    carefully.

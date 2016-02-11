@@ -50,7 +50,6 @@ type DoorGroup struct {
 	Down string `json:"d,omitempty"`
 }
 
-// TODO remove this
 // Exit information, which we receive as part of a room regstration response,
 // is currently kept in a struct. Consider using a map.
 type ExitGroup struct {
