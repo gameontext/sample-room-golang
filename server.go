@@ -25,7 +25,7 @@ type GameonRequest struct {
 }
 
 var (
-	expectedMessageType = websocket.TextMessage
+	ExpectedMessageType = websocket.TextMessage
 	upgrader            = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

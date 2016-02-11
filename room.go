@@ -113,21 +113,3 @@ func parseCommandPrefix(s string) (cmd, tail string, err error) {
 	err = JSPayloadError{fmt.Sprintf("Unrecognized command in '%s'", s)}
 	return
 }
-
-func sendPlayerResp(conn *websocket.Conn, targetid string, j []byte) error {
-	return sendResp(conn, targetid, j, MTPlayer)
-}
-
-func sendResp(conn *websocket.Conn, targetid string, j []byte, rtype string) error {
-	var m = fmt.Sprintf("%s,%s,%s", rtype, targetid, string(j))
-	err := conn.WriteMessage(expectedMessageType, []byte(m))
-	if config.debug {
-		fmt.Printf("sendResp(%s)\n", m)
-		if err == nil {
-			fmt.Printf("SENT OKAY\n")
-		} else {
-			fmt.Printf("SEND FAILED: %s\n", err.Error())
-		}
-	}
-	return err
-}
