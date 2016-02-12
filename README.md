@@ -69,7 +69,7 @@ Once installed:
 
 1. Log into your Bluemix account and space.
 
-  `cf ic login`  
+  `cf ic login`
 2. List your current external IP addresses.
 
   `cf ic ip list`
@@ -79,7 +79,7 @@ Once installed:
   `cf ic ip request`
 5. If you need to make an IP address available, release an IP address currently in use.
 
-  `cf ic ip release <public IP>`  
+  `cf ic ip release <public IP>`
 ## Game On! room in a Container
 To build a Game On! room in a container, first create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
 
@@ -136,3 +136,5 @@ To build a Game On! room in a container, first create the container locally in D
     ```
     cf ic ip bind <IP> <Container ID>
     ```
+
+If everything went well, your new room should be available for use on the Game On! server. Note that it can take a minute or two for the networking connections to establish themselves in a new container, so please be patient.
