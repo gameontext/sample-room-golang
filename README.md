@@ -1,15 +1,14 @@
 # Microservices with a Game On! Room
-[Game On!](https://game-on.org/) is both a sample microservices application, and a throwback text adventure brought to you by the wasdev team at IBM. It aims to do a few things:
+[Game On!](https://game-on.org/) is both a sample microservices application, and a throwback text adventure brought to you by the wasdev team at IBM. 
+This application demonstrates how microservice architectures work from two points of view:
 
-- Provide a sample microservices-based application.
-- Demonstrate how microservice architectures work from two points of view:
- - As a Player: Naviagate through a network/maze of rooms, where each room is a unique implementation of a common API. Each room supports chat, and interaction with items (some of which may be in the room, some of which may be separately defined services as well).
- - As a Developer: Learn about microservice architectures and supporting infrastructure by extending the game with your own services. Write additional rooms or items and see how they interact with the rest of the system.
+1. As a Player: Navigate through a network/maze of rooms, where each room is a unique implementation of a common API. Each room supports chat, and interaction with items (some of which may be in the room, some of which might be separately defined services as well).
+2. As a Developer: Learn about microservice architectures and their supporting infrastructure by extending the game with your own services. Write additional rooms or items and see how they interact with the rest of the system.
 
 
 ## Introduction
 
-This walkthrough will guide you through adding a room to a running Game On! server.  You will be shown how to setup a container based room that is implemented in the Go programming language.  There are also instructions for deploying a similar room written in Node.js that is deployed as a Cloud Foundry application in Bluemix.  Both of these rooms take a microservice approach to adding a room to a running Game On! text adventure game server.
+This walkthrough will guide you through adding a room to a running Game On! server.  You will be shown how to setup a container based room that is implemented in the Go programming language.  This solution takes a microservice approach to adding a room to a running Game On! text adventure game server.
 
 ### Installation prerequisites
 
@@ -136,3 +135,19 @@ To build a Game On! room in a container, first create the container locally in D
     ```
     cf ic ip bind <IP> <Container ID>
     ```
+
+## Access room on Game On!
+Once the room is set up and it has registered with the server, it will be accessible on [Game On!](https://game-on.org/). It may take a moment for the room to appear.
+
+1. Log in to [Game On!](https://game-on.org/) using the authentication method you used to create your user ID and shared secret for the registered room.
+2. Use the Game On! command `/listmyrooms` from The First Room, to see your list of rooms. Once your room is registered, it will appear in that list.
+3. To get to your room, navigate through the networkor go directly to it with the `/teleport` command from The First Room.
+
+### List of host provided commands
+The Game On! host provides a set a universal commands:
+- **/exits** - List of all exits from the current room.
+- **/help** - List all available commands for the current room.
+- **/sos** - Go back to The First Room.
+
+### The First Room commands
+The First Room is usually where new users will start in Game On!. From there, additional commands are available and maintained by the Game On!. For the list of current commands use the `/help` command.
