@@ -11,6 +11,10 @@ import (
 
 const localSecret = "MyRegistrationSecret"
 
+// A RoomConfig struct contains important, frequently-needed, information
+// about our current room registration as well as our interaction with
+// our Game On! server. Typically these values are collected from commandline
+// arguments.
 type RoomConfig struct {
 	// The basic address of the GameOn! server.
 	gameonAddr   string
@@ -46,11 +50,20 @@ type RoomConfig struct {
 	timeShift      int
 	retries        int
 	secondsBetween int
-	roomToDelete   string
+	// This is a room id and it is only used in the context of a
+	// delete request.
+	roomToDelete string
 }
 
+// config is our single, package-wide, source of configuration data.
+// (cmdling processing) ==> config ==> (used by code in this package)
 var config RoomConfig
 
+// We operate in one of two modes:
+//   - for a delete request, we get the work done and exit the program
+//   - for a registration request, we register the room and then run
+//     a server to handle websocket callbacks. Currently this server
+//     runs pretty much forever until the program is killed.
 func main() {
 	locus := "MAIN"
 	checkpoint(locus, "processCommandLine")
@@ -61,9 +74,10 @@ func main() {
 		return
 	}
 	printConfig(&config)
-	if config.roomToDelete != "" {
+
+	if len(config.roomToDelete) > 0 {
 		checkpoint(locus, fmt.Sprintf("deleteWithRetries %s", config.roomToDelete))
-		err = deleteWithRetries()
+		err = deleteWithRetries(config.roomToDelete)
 		if err != nil {
 			checkpoint(locus, fmt.Sprintf("DELETE.FAILED err=%s", err.Error()))
 		}
@@ -80,9 +94,10 @@ func main() {
 	startServer()
 }
 
-// Processes the commandline.
-// Sets values in the config struct and returns nil
-// if successful or an error otherwise
+// Processes our commandline and establishes the contents of
+// the package-wide config struct.
+//
+// Returns nil if successful or an error otherwise
 func processCommandline() (err error) {
 	flag.StringVar(&config.gameonAddr, "g", "", "GameOn! server address")
 	flag.StringVar(&config.callbackAddr, "c", "", "Our published callback address")
@@ -109,7 +124,9 @@ func processCommandline() (err error) {
 		err = ArgError{"Missing Game-on server address."}
 		return
 	}
-	if config.roomToDelete == "" {
+	if len(config.roomToDelete) == 0 {
+		// This is not a deletion request so make sure the information
+		// we need to register a room and run the websocket server is valid.
 		if config.callbackAddr == "" {
 			err = ArgError{"Missing callback address."}
 			return
@@ -119,6 +136,7 @@ func processCommandline() (err error) {
 			return
 		}
 		if config.listeningPort < 0 {
+			// listening port defaults to callback port
 			config.listeningPort = config.callbackPort
 		}
 		if config.roomName == "" {
@@ -151,7 +169,7 @@ func printConfig(c *RoomConfig) {
 	}
 }
 
-// Print a simple checkpoint message.
+// Prints a simple checkpoint message.
 func checkpoint(locus, s string) {
 	fmt.Printf("CHECKPOINT: %s.%s\n", locus, s)
 }
