@@ -37,7 +37,6 @@ const (
 	slashExamine   = "EXAMINE"
 	slashExit      = "EXIT"
 	slashGo        = "GO"
-	slashHelp      = "HELP"
 	slashInventory = "INVENTORY"
 	slashLook      = "LOOK"
 )
@@ -45,7 +44,7 @@ const (
 var roomCommands = []string{slashExamine, slashExit, slashGo, slashHelp,
 	slashInventory, slashLook}
 var slashCommands = []string{"/" + slashExamine, "/" + slashExit, "/" + slashGo,
-	"/" + slashHelp, "/" + slashInventory, "/" + slashLook}
+	"/" + slashInventory, "/" + slashLook}
 
 // Recognizes and dispatches a room slash command. Nil is returned
 // if all goes well, otherwise an error is returned.
@@ -61,8 +60,6 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 		return exitRoom(conn, req, tail, room)
 	case slashLook:
 		return lookAroundRoom(conn, req, tail, room)
-	case slashHelp:
-		return helpCommand(conn, req, tail, room)
 	case slashInventory:
 		return checkInventory(conn, req, tail, room)
 	case slashExamine:
