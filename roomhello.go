@@ -46,6 +46,24 @@ func handleHello(conn *websocket.Conn, req *GameonRequest, room string) (e error
 	resp.Rtype = "location"
 	resp.Name = config.roomName
 	resp.Description = fmt.Sprintf("This is %s", MyRooms[room])
+
+	// The /help command's output is somewhat canned.  That is, it will
+	// always list a minimal set of commands that the room should respond
+	// to:
+	//   - /help, /exits and /sos are implemented by the Game On! server and
+	//     so they will always exist and function for free.  /
+	//   - /go, /examine and /look are included in the minimal command set,
+	//     but the room must catch and respond to these commands in order to
+	//     do anything useful.
+	//
+	// If your room supports addtional commands then their descriptions should
+	// be added to the location response so that Game On! knows to include them
+	// in the output from a /help command in your room.
+	//
+	// You can change the description of one of the minimal commands, by including
+	// it in the response and by giving it your own descriptive text.  There is no
+	// way, currently, to remove a command from the list that you are choosing not
+	// to support.
 	resp.Commands = make(map[string]string)
 	for _, c := range commandsWeAdd {
 		resp.Commands[c.cmd] = c.desc
