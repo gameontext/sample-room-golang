@@ -7,10 +7,7 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
 	"crypto/tls"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -170,16 +167,8 @@ func registerOurRoom(client *http.Client) (err error) {
 		fmt.Printf("Internal registration error: %s\n", err.Error())
 		return
 	}
-	ts := makeTimestamp()
-	bodyHash := hash(registration)
-	tokens := []string{config.id, ts, bodyHash}
-	sig := buildHmac(tokens, config.secret)
-	var u string
-	if config.localServer {
-		u = fmt.Sprintf("http://%s/map/v1/sites", config.gameonAddr)
-	} else {
-		u = fmt.Sprintf("https://%s/map/v1/sites", config.gameonAddr)
-	}
+
+	u := fmt.Sprintf("%s://%s/map/v1/sites", config.protocol, config.gameonAddr)
 
 	if config.debug {
 		fmt.Printf("\nREG.POST URL: %s\n", u)
@@ -194,17 +183,8 @@ func registerOurRoom(client *http.Client) (err error) {
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json,text/plain")
-	req.Header.Set("gameon-id", config.id)
-	req.Header.Set("gameon-date", ts)
-	req.Header.Set("gameon-sig-body", bodyHash)
-	req.Header.Set("gameon-signature", sig)
-	if config.debug {
-		for _, k := range []string{"gameon-id", "gameon-date", "gameon-sig-body", "gameon-signature"} {
-			fmt.Printf("%s=%s\n", k, req.Header.Get(k))
-		}
-	}
+	addAuthenticationHeaders(req, registration)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		checkpoint(locus, fmt.Sprintf("Post.Error err=%s", err.Error()))
@@ -219,6 +199,7 @@ func registerOurRoom(client *http.Client) (err error) {
 	switch resp.StatusCode {
 	case http.StatusCreated:
 		checkpoint(locus, "Registered")
+		traceResponseBody(locus, resp, body)
 		err = rememberRegistration(resp, body)
 		return
 	case http.StatusConflict:
@@ -239,25 +220,6 @@ func printRoomRegistrationResp(locus string, r *RoomRegistrationResp) {
 	if err == nil {
 		fmt.Printf("\n%s\n%s\n", locus, string(j))
 	}
-}
-
-// Returns the current time as a UTC-formatted string.
-// If config.timeShift is non-zero, then the timestamp will
-// be shifted by config.timeShift milliseconds. This can be
-// used to slide our registration timestamp closer to the
-// clock on a remote GameOn! server.
-func makeTimestamp() string {
-	if config.timeShift == 0 {
-		return time.Now().UTC().Format(time.RFC3339Nano)
-	}
-	locus := "MAKE.TIMESTAMP"
-	t1 := time.Now()
-	t2 := t1.Add(time.Duration(config.timeShift) * time.Millisecond)
-	ourTime := t1.UTC().Format(time.RFC3339Nano)
-	serverTime := t2.UTC().Format(time.RFC3339Nano)
-	checkpoint(locus, fmt.Sprintf("ourTime    %s", ourTime))
-	checkpoint(locus, fmt.Sprintf("serverTime %s", serverTime))
-	return serverTime
 }
 
 // Generate a JSON string containing our registration info.
@@ -337,23 +299,6 @@ func extractBody(r *http.Response) (body string, e error) {
 	return
 }
 
-func hash(message string) string {
-	h := sha256.New()
-	h.Write([]byte(message))
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
-func buildHmac(tokens []string, secret string) string {
-	key := []byte(secret)
-	h := hmac.New(sha256.New, key)
-	s := ""
-	for _, t := range tokens {
-		s += t
-	}
-	h.Write([]byte(s))
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
 type RoomQueryResp struct {
 	Id    string              `json:"_id,omitempty"`
 	Owner string              `json:"owner,omitempty"`
@@ -369,13 +314,17 @@ func rememberMyRooms() (err error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	u := fmt.Sprintf("http://%s/map/v1/sites?owner=%s", config.gameonAddr, config.id)
+	u := fmt.Sprintf("%s://%s/map/v1/sites?owner=%s",
+		config.protocol, config.gameonAddr, config.id)
 	checkpoint(locus, u)
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		checkpoint(locus, fmt.Sprintf("NewRequest.Error err=%s", err.Error()))
 		return
 	}
+
+	addAuthenticationHeaders(req, "")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		checkpoint(locus, fmt.Sprintf("Get.Error err=%s", err.Error()))
@@ -386,6 +335,7 @@ func rememberMyRooms() (err error) {
 		checkpoint(locus, fmt.Sprintf("Body.Error err=%s", err.Error()))
 		return
 	}
+	traceResponseBody(locus, resp, body)
 	switch resp.StatusCode {
 	case http.StatusOK:
 		var qr [25]RoomQueryResp
