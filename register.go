@@ -3,7 +3,6 @@
 // Version 2.0, a copy of which can be found in the LICENSE file.
 
 // Room registration.
-
 package main
 
 import (

@@ -4,6 +4,7 @@
 
 package main
 
+// Room /chat command
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"

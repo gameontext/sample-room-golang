@@ -4,6 +4,7 @@
 
 package main
 
+// Room /examine command
 import (
 	"encoding/json"
 	"fmt"

@@ -5,6 +5,9 @@
 // Documentation
 package main
 
+// Game On!
+// Main site: https://game-on.org
+
 // JSON Marshalling Notes
 //
 // 1. All marshalling is performed using json.MarshalIndent so
@@ -22,3 +25,9 @@ package main
 //    of a struct designed to keep a subset of the information
 //    returned in a response. (We do not need exits or coords
 //    so we do not map those fields.)
+
+// Room commands
+//
+// The handling for each room command (/go, /look, etc.) is kept in
+// its own source file and it typically named room<cmd>.go, as in
+// roomchat.go, roomlook.go, etc.

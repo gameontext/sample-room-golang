@@ -4,6 +4,7 @@
 
 package main
 
+// Room /go command
 import (
 	"encoding/json"
 	"fmt"
