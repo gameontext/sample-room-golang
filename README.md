@@ -141,7 +141,7 @@ Once the room is set up and it has registered with the server, it will be access
 
 1. Log in to [Game On!](https://game-on.org/) using the authentication method you used to create your user ID and shared secret for the registered room.
 2. Use the Game On! command `/listmyrooms` from The First Room, to see your list of rooms. Once your room is registered, it will appear in that list.
-3. To get to your room, navigate through the networkor go directly to it with the `/teleport` command from The First Room.
+3. To get to your room, navigate through the network or go directly to it using the `/teleport` command from The First Room.
 
 ### List of host provided commands
 The Game On! host provides a set a universal commands:
