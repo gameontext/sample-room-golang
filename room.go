@@ -35,17 +35,26 @@ func handleRoom(conn *websocket.Conn, req *GameonRequest, room string) error {
 const (
 	// Slash commands, without the actual '/', of course.
 	slashExamine   = "EXAMINE"
-	slashExit      = "EXIT"
 	slashGo        = "GO"
-	slashHelp      = "HELP"
 	slashInventory = "INVENTORY"
 	slashLook      = "LOOK"
+	slashWink      = "WINK"
 )
 
-var roomCommands = []string{slashExamine, slashExit, slashGo, slashHelp,
-	slashInventory, slashLook}
-var slashCommands = []string{"/" + slashExamine, "/" + slashExit, "/" + slashGo,
-	"/" + slashHelp, "/" + slashInventory, "/" + slashLook}
+// The is the list of commands that we are willing to catch.
+var commandsWeSupport = []string{slashExamine, slashGo, slashInventory, slashLook, slashWink}
+
+type CommandDesc struct {
+	cmd  string
+	desc string
+}
+
+// This is the list of commands that we add, over and above the normal set.
+// When a player enters our room, we will need to tell them game about these
+// commands so that the game knows to add the to /help output.
+var commandsWeAdd = []CommandDesc{
+	{"/wink", "(You wonder what this would do.)"},
+}
 
 // Recognizes and dispatches a room slash command. Nil is returned
 // if all goes well, otherwise an error is returned.
@@ -53,21 +62,23 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 	locus := "HANDLE.SLASH"
 	cmd, tail, err := parseCommandPrefix(req.Content)
 	if err != nil {
+		sendMessageToRoom(conn, NoMessage, "What? I didn't understand that.", req.UserId)
 		return err
 	}
 	checkpoint(locus, fmt.Sprintf("cmd=%s tail=%s", cmd, tail))
 	switch cmd {
-	case slashGo, slashExit:
+	case slashGo:
 		return exitRoom(conn, req, tail, room)
 	case slashLook:
 		return lookAroundRoom(conn, req, tail, room)
-	case slashHelp:
-		return helpCommand(conn, req, tail, room)
 	case slashInventory:
 		return checkInventory(conn, req, tail, room)
 	case slashExamine:
 		return examineObject(conn, req, tail, room)
+	case slashWink:
+		return wink(conn, req, tail, room)
 	default:
+		sendMessageToRoom(conn, NoMessage, "What? I didn't understand that.", req.UserId)
 		return JSPayloadError{fmt.Sprintf("Unrecognized command: '%s'", cmd)}
 	}
 }
@@ -87,7 +98,7 @@ func parseCommandPrefix(s string) (cmd, tail string, err error) {
 	}
 	haystack := strings.ToUpper(s[1:])
 	hlen := len(haystack)
-	for _, key := range roomCommands {
+	for _, key := range commandsWeSupport {
 		if config.debug {
 			fmt.Printf("parseCommandPrefix: '%s' vs '%s'\n", key, haystack)
 		}

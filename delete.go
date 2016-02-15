@@ -66,12 +66,8 @@ func deleteWithRetries(roomId string) (e error) {
 func deleteRoom(client *http.Client, roomId string) (stopTrying bool, err error) {
 	locus := "DELETE.ROOM"
 	checkpoint(locus, "Begin")
-	var u string
-	if config.localServer {
-		u = fmt.Sprintf("http://%s/map/v1/sites/%s", config.gameonAddr, roomId)
-	} else {
-		u = fmt.Sprintf("https://%s/map/v1/sites/%s", config.gameonAddr, roomId)
-	}
+	u := fmt.Sprintf("%s://%s/map/v1/sites/%s",
+		config.protocol, config.gameonAddr, roomId)
 	checkpoint(locus, fmt.Sprintf("URL %s", u))
 
 	req, err := http.NewRequest("DELETE", u, nil)
@@ -80,27 +76,7 @@ func deleteRoom(client *http.Client, roomId string) (stopTrying bool, err error)
 		return
 	}
 
-	// Build the authentication values that Game On! requires. Note that
-	// delete requests have empty bodies and an empty body hash. Also,
-	// unlike some other requests, the body hash is not part of the
-	// hmac signature.
-	ts := makeTimestamp()
-	bodyHash := hash("")
-	tokens := []string{config.id, ts}
-	sig := buildHmac(tokens, config.secret)
-
-	// Set the required headers.
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json,text/plain")
-	req.Header.Set("gameon-id", config.id)
-	req.Header.Set("gameon-date", ts)
-	req.Header.Set("gameon-sig-body", bodyHash)
-	req.Header.Set("gameon-signature", sig)
-	if config.debug {
-		for _, k := range []string{"gameon-id", "gameon-date", "gameon-sig-body", "gameon-signature"} {
-			fmt.Printf("%s=%s\n", k, req.Header.Get(k))
-		}
-	}
+	addAuthenticationHeaders(req, "")
 
 	resp, err := client.Do(req)
 	if err != nil {

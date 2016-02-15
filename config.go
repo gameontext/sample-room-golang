@@ -54,6 +54,8 @@ type RoomConfig struct {
 	// This is a room id and it is only used in the context of a
 	// delete request.
 	roomToDelete string
+	// The protocol to be used when talking to the game server.
+	protocol string
 }
 
 // config is our single, package-wide, source of configuration data.
@@ -108,6 +110,11 @@ func processCommandline() (err error) {
 		if config.roomName == "" {
 			config.roomName = fmt.Sprintf("ROOM.%05d", config.callbackPort)
 		}
+	}
+	if config.localServer {
+		config.protocol = "http"
+	} else {
+		config.protocol = "https"
 	}
 	return
 }

@@ -15,6 +15,11 @@ type HelloResponse struct {
 	Rtype       string `json:"type,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
+
+	// We have intentially omitted the exits response field
+	// because we do not wish to override our initial exit setup.
+
+	Commands map[string]string `json:"commands,omitempty"`
 }
 
 // Handles the "hello" request that is received each time
@@ -41,6 +46,10 @@ func handleHello(conn *websocket.Conn, req *GameonRequest, room string) (e error
 	resp.Rtype = "location"
 	resp.Name = config.roomName
 	resp.Description = fmt.Sprintf("This is %s", MyRooms[room])
+	resp.Commands = make(map[string]string)
+	for _, c := range commandsWeAdd {
+		resp.Commands[c.cmd] = c.desc
+	}
 	j, e = json.MarshalIndent(resp, "", "    ")
 	if e != nil {
 		return
