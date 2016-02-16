@@ -97,6 +97,7 @@ func parseCommandPrefix(s string) (cmd, tail string, err error) {
 		err = JSPayloadError{"Invalid command format: Missing leading slash"}
 		return
 	}
+	haystackAsis := s[1:]
 	haystack := strings.ToUpper(s[1:])
 	hlen := len(haystack)
 	for _, key := range commandsWeSupport {
@@ -118,7 +119,7 @@ func parseCommandPrefix(s string) (cmd, tail string, err error) {
 		}
 		if " " == haystack[n:n+1] {
 			cmd = key
-			tail = strings.Trim(haystack[n:], " ")
+			tail = strings.Trim(haystackAsis[n:], " ")
 			return
 		}
 	}
