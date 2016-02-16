@@ -5,6 +5,32 @@
 // Documentation
 package main
 
+// This code takes a microservice approach to inserting a room
+// into a running Game On! instance. We consume microservices
+// provided by Game On! to register a room and we provide our own
+// microservice that allows Game On! to bring our room to life.
+// In the process of responding to requests from Game On!, we in
+// turn will use additonal Game On! microservices to send notifications
+// to players and rooms and also to manage certain player aspects,
+// such as their next location, during their time in our room.
+
+// The Dance
+//
+// In this discussion we assume that we are consistent in using
+// the same websocket callback.
+//
+// When we start, we check to see if our room (by name) has
+// already been registered. If not, then we register it using
+// an authenticated registration POST.  Once we have determined
+// that our room is registered, we use an unauthticated GET to
+// gather the names of all rooms that we currently have registered.
+// (This code is capable of handling multiple rooms as long as each
+// room was registered using the same callback address.)
+//
+// At this point we start our websocket server to listen for
+// service requests from Game On!; the websocket server runs
+// forever until our program is terminated.
+
 // Game On!
 // Main site: https://game-on.org
 
@@ -29,5 +55,13 @@ package main
 // Room commands
 //
 // The handling for each room command (/go, /look, etc.) is kept in
-// its own source file and it typically named room<cmd>.go, as in
+// its own source file and it is typically named room<cmd>.go, as in
 // roomchat.go, roomlook.go, etc.
+
+// Deleting rooms
+//
+// At the time that this code was being written, Game On! did not
+// expose a console command to delete a room. Since that initial
+// time a console command has been added to delete a room. This
+// room's delete code will remain, however, as an example of
+// deleting a room from outside of Game On!
