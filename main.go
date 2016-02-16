@@ -6,8 +6,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"net/http"
 )
 
 // We operate in one of two modes:
@@ -26,9 +28,14 @@ func main() {
 	}
 	printConfig(&config)
 
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
 	if len(config.roomToDelete) > 0 {
 		checkpoint(locus, fmt.Sprintf("deleteWithRetries %s", config.roomToDelete))
-		err = deleteWithRetries(config.roomToDelete)
+		err = deleteWithRetries(client, config.roomToDelete)
 		if err != nil {
 			checkpoint(locus, fmt.Sprintf("DELETE.FAILED err=%s", err.Error()))
 		}
@@ -36,7 +43,8 @@ func main() {
 	}
 
 	checkpoint(locus, "registerWithRetries")
-	err = registerWithRetries()
+
+	err = registerWithRetries(client)
 	if err != nil {
 		fmt.Printf(err.Error())
 		return

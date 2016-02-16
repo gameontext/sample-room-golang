@@ -7,7 +7,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -17,13 +16,9 @@ import (
 // on connection failure.
 //
 // An error will be returned if the deletion fails, otherwise nil will be returned.
-func deleteWithRetries(roomId string) (e error) {
+func deleteWithRetries(client *http.Client, roomId string) (e error) {
 	locus := "DELETE_W_RETRIES"
 	checkpoint(locus, fmt.Sprintf("retries=%d secondsBetween=%d", config.retries, config.secondsBetween))
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
 
 	for i := 0; i < config.retries; i++ {
 		checkpoint(locus, fmt.Sprintf("Begin attempt %d of %d",
