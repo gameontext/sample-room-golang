@@ -17,9 +17,10 @@ package main
 // The Dance
 //
 // In this discussion we assume that we are consistent in using
-// the same websocket callback.
+// the same websocket callback every time that our program is
+// started.
 //
-// When we start, we check to see if our room (by name) has
+// On starting up, we check to see if our room (by name) has
 // already been registered. If not, then we register it using
 // an authenticated registration POST.  Once we have determined
 // that our room is registered, we use an unauthticated GET to
@@ -30,6 +31,21 @@ package main
 // At this point we start our websocket server to listen for
 // service requests from Game On!; the websocket server runs
 // forever until our program is terminated.
+//
+// Future work:
+//
+// Reconnects to previously-registered rooms are handled
+// somewhat naively: if we find a room that we have previously
+// registered, then we save info about that room so that
+// we can customize later interactions.  However, if those rooms
+// were registered to use a different callback address from the
+// one that we are currently using, then we will never be asked
+// to service those rooms.  A less-simplistic approach would
+// save only those rooms that had a callback address matching
+// the callback address that we are currently registering;
+// a more ambitious approach would be to start another go routine
+// to handle each additional callback address that we discover
+// in our list of previously-registered rooms.
 
 // Game On!
 // Main site: https://game-on.org
