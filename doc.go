@@ -32,6 +32,15 @@ package main
 // service requests from Game On!; the websocket server runs
 // forever until our program is terminated.
 //
+// Ack'ing new connections
+//
+// Game On! opens a new websocket connection each time a player
+// enters our room. As soon as the connection is opened and ready
+// to use the websocket protocol, we must send an ack message back
+// to Game On!. At the time of this writing, the sole purpose of the
+// ack message is to send the list of procotol versions that this
+// room supports.
+//
 // Future work:
 //
 // Reconnects to previously-registered rooms are handled
