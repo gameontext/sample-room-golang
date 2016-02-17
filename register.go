@@ -6,13 +6,19 @@
 package main
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+)
+
+const (
+	// The maximum number of query results (previously-registered rooms)
+	// that we will accept when asking for all rooms registered by our
+	// current userid. See rememberMyRooms().
+	MaxRegQueries = 2048
 )
 
 type ConnDetails struct {
@@ -47,16 +53,16 @@ type RoomRegistrationResp struct {
 }
 
 // Registers our room with the GameOn! server, with retries on failure.
-func registerWithRetries() (e error) {
+func registerWithRetries(client *http.Client) (e error) {
 	locus := "REG_W_RETRIES"
 	checkpoint(locus, fmt.Sprintf("retries=%d secondsBetween=%d", config.retries, config.secondsBetween))
 	for i := 0; i < config.retries; i++ {
 		checkpoint(locus, fmt.Sprintf("Begin attempt %d of %d",
 			i+1, config.retries))
-		e = register()
+		e = register(client)
 		if e == nil {
 			checkpoint(locus, "Registration was successful.")
-			rememberMyRooms()
+			rememberMyRooms(client)
 			return
 		}
 		checkpoint(locus, fmt.Sprintf("sleeping %d seconds.", config.secondsBetween))
@@ -71,13 +77,9 @@ func registerWithRetries() (e error) {
 
 // Registers our room with the game-on server if the room is not
 // already registered.
-func register() (err error) {
+func register(client *http.Client) (err error) {
 	locus := "REG"
 	checkpoint(locus, "Begin")
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
 
 	var registered bool
 	registered, err = checkForPriorRegistration(client)
@@ -86,13 +88,13 @@ func register() (err error) {
 		return
 	}
 	if registered {
-		checkpoint(locus, "WasAlreadyRegistered")
+		checkpoint(locus, fmt.Sprintf("WasAlreadyRegistered %s", config.roomName))
 		return
 	}
 	checkpoint(locus, "WeNeedToRegister")
 	err = registerOurRoom(client)
 	if err == nil {
-		checkpoint(locus, "Registered")
+		checkpoint(locus, fmt.Sprintf("Registered %s", config.roomName))
 	} else {
 		checkpoint(locus, fmt.Sprintf("RegistrationFailed err=%s", err.Error()))
 	}
@@ -306,13 +308,9 @@ type RoomQueryResp struct {
 
 var MyRooms map[string]string
 
-func rememberMyRooms() (err error) {
+func rememberMyRooms(client *http.Client) (err error) {
 	locus := "REG.LISTMYROOMS"
 	MyRooms = make(map[string]string)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
 	u := fmt.Sprintf("%s://%s/map/v1/sites?owner=%s",
 		config.protocol, config.gameonAddr, config.id)
 	checkpoint(locus, u)
@@ -337,7 +335,7 @@ func rememberMyRooms() (err error) {
 	traceResponseBody(locus, resp, body)
 	switch resp.StatusCode {
 	case http.StatusOK:
-		var qr [25]RoomQueryResp
+		var qr [MaxRegQueries]RoomQueryResp
 		e := json.Unmarshal([]byte(body), &qr)
 		if e != nil {
 			fmt.Printf("%s: JSON unmarshalling error: %s\n",

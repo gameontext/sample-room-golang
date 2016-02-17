@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"strings"
 )
 
 type ExaminationResponse struct {
@@ -22,8 +23,21 @@ func examineObject(conn *websocket.Conn, req *GameonRequest, tail, room string) 
 	var resp ExaminationResponse
 	resp.Rtype = "event"
 	resp.Content = make(map[string]string)
-	resp.Content[req.UserId] = fmt.Sprintf("There is nothing here in %s. Keep moving.",
-		MyRooms[room])
+	obj := strings.Trim(tail, " ")
+	if len(obj) > 0 {
+		var verb string
+		if "s" == strings.ToLower(obj[len(obj)-1:]) {
+			verb = "are"
+		} else {
+			verb = "is"
+		}
+		resp.Content[req.UserId] = fmt.Sprintf("There %s no %s here in %s. Keep moving.",
+			verb, obj, MyRooms[room])
+	} else {
+		resp.Content[req.UserId] = fmt.Sprintf("There is nothing here in %s. Keep moving.",
+			MyRooms[room])
+	}
+
 	j, err := json.MarshalIndent(resp, "", "    ")
 	if err != nil {
 		return err

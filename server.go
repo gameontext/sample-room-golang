@@ -30,6 +30,10 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+	// Supported versions is the list of version numbers
+	// that we are willing to support. Currently we only
+	// support version 1.
+	SupportedVersions = []int{1}
 )
 
 // Handles incoming requests directed to our room.
@@ -48,6 +52,7 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 		return
 	}
+	ack(conn)
 
 	for {
 		checkpoint(locus, "READ We are waiting for a message.")
@@ -143,4 +148,30 @@ func startServer() {
 	if err != nil {
 		panic("Error: " + err.Error())
 	}
+}
+
+type WebSocketAck struct {
+	// This is the list of versions that we are willing to support.
+	Version []int `json:"version,omitempty"`
+}
+
+// Acknowledges the newly open websocket.
+func ack(conn *websocket.Conn) (e error) {
+	locus := "ACK"
+	var ack WebSocketAck
+	ack.Version = SupportedVersions
+	j, e := json.MarshalIndent(ack, "", "    ")
+	if e != nil {
+		checkpoint(locus, fmt.Sprintf("FAILED. err=%s", e.Error()))
+		return
+	}
+	var m = fmt.Sprintf("%s,%s", "ack", string(j))
+	e = conn.WriteMessage(ExpectedMessageType, []byte(m))
+	if config.debug {
+		checkpoint(locus, fmt.Sprintf("MSG=%s", m))
+	}
+	if e != nil {
+		checkpoint(locus, fmt.Sprintf("FAILED err=%s", e.Error()))
+	}
+	return
 }
