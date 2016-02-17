@@ -18,6 +18,23 @@ const (
 	lookAround  = "look"
 )
 
+// roomHello,43a4d07399ea23d648568c6d2d000b65,
+// {"version": 1,"username": "DevUser","userId": "dummy.DevUser"}
+type HelloMessage struct {
+	Version  int    `json:"version,omitempty"`
+	UserId   string `json:"userId,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+// roomGoodbye,43a4d07399ea23d648568c6d2d000b65,
+// {"username": "DevUser","userId": "dummy.DevUser"}
+type GoodbyeMessage struct {
+	UserId   string `json:"userId,omitempty"`
+	Username string `json:"username,omitempty"`
+}
+
+// room,43a4d07399ea23d648568c6d2d000b65,
+// {"username":"DevUser","userId":"dummy.DevUser","content":"/examine book"}
 type GameonRequest struct {
 	UserId   string `json:"userId,omitempty"`
 	Username string `json:"username,omitempty"`
@@ -68,31 +85,42 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 			checkpoint(locus, fmt.Sprintf("PARSE.ERROR err=%s", err.Error()))
 			continue
 		}
-		if config.debug {
-			fmt.Printf("PARSED cmd=%s\n", cmd)
-			fmt.Printf("PARSED room=%s\n", room)
-			fmt.Printf("PARSED JSON=%s\n", j)
-		}
 
-		var req GameonRequest
-		err = json.Unmarshal([]byte(j), &req)
-		if err != nil {
-			checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR err=%s", err.Error()))
-			checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR Offending JSON=%s", j))
-			continue
-		}
 		if config.debug {
-			fmt.Printf("roomHandler cmd='%s'\n", cmd)
-			fmt.Printf("roomHandler room='%s'\n", room)
-			fmt.Printf("roomHandler json='%s'\n", j)
+			checkpoint(locus, fmt.Sprintf("PARSE cmd=%s", cmd))
+			checkpoint(locus, fmt.Sprintf("PARSE room=%s", room))
+			checkpoint(locus, fmt.Sprintf("PARSE json=%s", j))
 		}
 
 		switch cmd {
 		case "roomHello":
+			var req HelloMessage
+			err = json.Unmarshal([]byte(j), &req)
+			if err != nil {
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR err=%s", err.Error()))
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR Offending JSON=%s", j))
+				continue
+			}
 			err = handleHello(conn, &req, room)
+
 		case "roomGoodbye":
+			var req GoodbyeMessage
+			err = json.Unmarshal([]byte(j), &req)
+			if err != nil {
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR err=%s", err.Error()))
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR Offending JSON=%s", j))
+				continue
+			}
 			err = handleGoodbye(conn, &req, room)
+
 		case "room":
+			var req GameonRequest
+			err = json.Unmarshal([]byte(j), &req)
+			if err != nil {
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR err=%s", err.Error()))
+				checkpoint(locus, fmt.Sprintf("JSON.UNMARSHALL.ERROR Offending JSON=%s", j))
+				continue
+			}
 			err = handleRoom(conn, &req, room)
 		default:
 			err = handleInvalidMessage(conn, payload)

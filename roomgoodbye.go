@@ -12,7 +12,7 @@ import (
 
 // Handles the "good-bye" request that is received each time
 // a player leaves our room.
-func handleGoodbye(conn *websocket.Conn, req *GameonRequest, room string) error {
+func handleGoodbye(conn *websocket.Conn, req *GoodbyeMessage, room string) error {
 	locus := "GOODBYE"
 	checkpoint(locus, fmt.Sprintf("room=%s userid=%s username=%s\n",
 		MyRooms[room], req.UserId, req.Username))

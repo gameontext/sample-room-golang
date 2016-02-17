@@ -25,13 +25,26 @@ type HelloResponse struct {
 // Handles the "hello" request that is received each time
 // a player enters our room. The incoming request is a string
 // with the format <room>,<json>, where the JSON string contains
-// the userid and username of the player entering our room. For
-// example: "Room 3100",{"username": "ebullient","userId": "github:808713"}
+// the version, userid and username of the player entering our room.
+// For example:
+//   roomHello,43a4d07399ea23d648568c6d2d000b65,
+//   {"version": 1,"username": "DevUser","userId": "dummy.DevUser"}
 //
 // Return an error if a problem occurs, otherwise return nil.
-func handleHello(conn *websocket.Conn, req *GameonRequest, room string) (e error) {
-	checkpoint("HELLO", fmt.Sprintf("room=%s userid=%s username=%s\n",
-		config.roomName, req.UserId, req.Username))
+func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error) {
+	locus := "HELLO"
+	checkpoint(locus, fmt.Sprintf("room=%s version=%d userid=%s username=%s\n",
+		MyRooms[room], req.Version, req.UserId, req.Username))
+
+	if versionSupported(req.Version) {
+		checkpoint(locus, fmt.Sprintf("VERSION=%d is supported.", req.Version))
+	} else {
+		checkpoint(locus, fmt.Sprintf("VERSION=%d is NOT supported.", req.Version))
+		conn.Close()
+		checkpoint(locus, "CONN.CLOSED")
+		e = VersionError{fmt.Sprintf("Version %d is not supported by this room.", req.Version)}
+		return
+	}
 
 	// Announce to the room and the player that the player has entered
 	// the room. Ignore errors for this.
@@ -74,4 +87,13 @@ func handleHello(conn *websocket.Conn, req *GameonRequest, room string) (e error
 	}
 	e = sendPlayerResp(conn, req.UserId, j)
 	return
+}
+
+func versionSupported(v int) bool {
+	for _, v := range SupportedVersions {
+		if v == v {
+			return true
+		}
+	}
+	return false
 }

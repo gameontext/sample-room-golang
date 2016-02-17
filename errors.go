@@ -39,3 +39,10 @@ type ArgError struct {
 }
 
 func (e ArgError) Error() string { return fmt.Sprintf("ARG.ERROR: %s", e.message) }
+
+// VersionError describes a mismatch between requested and supported versions.
+type VersionError struct {
+	message string
+}
+
+func (e VersionError) Error() string { return fmt.Sprintf("VERSION.ERROR: %s", e.message) }
