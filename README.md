@@ -60,7 +60,7 @@ To find this information:
 4. In the Containers tile, information about your IP addresses is listed.
 5. Check that the **Public IPs Requested** field has at least one available IP address.
 
-If you have an IP address available, you can request a new IP or use an existing available IP to start building your Game On! room. If all of your IP addresses have been used, you will need to release one. In either case, to manage your public IP addresses, install the CF IC plugin, which can be found at the website below.
+If you have an IP address available, you can request a new IP or use an existing available IP to start building your Game On! room. If all of your IP addresses have been used, you will need to unbind one. In either case, to manage your public IP addresses, install the CF IC plugin, which can be found at the website below.
 
 [https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs](https://www.ng.bluemix.net/docs/containers/container_cli_ov.html#container_cli_cfic_installs)
 
@@ -76,9 +76,9 @@ Once installed:
 4. If you are not at your limit of IP addresses and want a new one, request an IP address.
 
   `cf ic ip request`
-5. If you need to make an IP address available, release an IP address currently in use.
+5. If you need to make an IP address available, unbind an IP address currently in use.
 
-  `cf ic ip release <public IP>`  
+  `cf ic ip unbind <public IP> <Container ID>`  
 ## Game On! room in a Container
 To build a Game On! room in a container, first create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
 
