@@ -11,6 +11,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	// Special broadcast sender id
+	TrackerSender = "tracker.is.sender"
+)
+
 // Player connections are used to track a player's
 // time in a room; they are mostly useful for implementing
 // chat broadcasts.
@@ -47,7 +52,11 @@ var tracker = Tracker{
 }
 
 func BroadcastMessage(r, m, sender, receiver string) {
-	var bc = Broadcast{roomId: r, message: m, sender: sender, receiver: receiver}
+	var bc = Broadcast{
+		roomId:   r,
+		message:  m,
+		sender:   normalizeBroadcastSender(sender, receiver),
+		receiver: receiver}
 	tracker.broadcast <- &bc
 }
 
@@ -56,7 +65,7 @@ func TrackPlayer(pc *PlayerConnection) {
 }
 
 func UntrackPlayer(roomId, playerId string) {
-	tracker.remove <- makePlayerKey(roomId, playerId)
+	tracker.remove <- makePlayerKey(playerId, roomId)
 }
 
 // Runs the player tracker. This should be started as a new
@@ -69,8 +78,13 @@ func RunTracker() {
 			logPlayer(pc, "ADDING", config.debug)
 			tracker.players[makePlayerKey(pc.playerId, pc.roomId)] = pc
 		case k := <-tracker.remove:
-			logPlayer(tracker.players[k], "REMOVING", config.debug)
-			delete(tracker.players, k)
+			pc := tracker.players[k]
+			if pc == nil {
+				checkpoint("TRACKER", fmt.Sprintf("k=%s not found", k))
+			} else {
+				logPlayer(pc, "REMOVING", config.debug)
+				delete(tracker.players, k)
+			}
 		case bc := <-tracker.broadcast:
 			broadcast(bc)
 		}
@@ -135,4 +149,16 @@ func broadcast(bc *Broadcast) {
 			}
 		}
 	}
+}
+
+var bcCounter = 0
+
+// Normalize morphs the special tracker id into a tracker
+// id with a message number appended.
+func normalizeBroadcastSender(s, r string) string {
+	if s == TrackerSender {
+		bcCounter += 1
+		return fmt.Sprintf("tracker.%04d", bcCounter)
+	}
+	return s
 }

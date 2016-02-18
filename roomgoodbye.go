@@ -21,6 +21,6 @@ func handleGoodbye(conn *websocket.Conn, req *GoodbyeMessage, room string) error
 
 	// Announce to the room that the player has left.
 	m := fmt.Sprintf("%s has left %s.", req.Username, config.roomName)
-	BroadcastMessage(room, m, "tracker", "*")
+	BroadcastMessage(room, m, TrackerSender, "*")
 	return nil
 }
