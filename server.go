@@ -170,6 +170,7 @@ func handleInvalidMessage(conn *websocket.Conn, p []byte) error {
 func startServer() {
 	locus := "WS.SERVER"
 	go RunTracker()
+	go RunTalker()
 	checkpoint(locus, fmt.Sprintf("Listening to port %d", config.listeningPort))
 	http.HandleFunc("/", roomHandler)
 	u := fmt.Sprintf(":%d", config.listeningPort)

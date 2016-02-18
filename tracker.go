@@ -37,11 +37,17 @@ type Broadcast struct {
 	receiver string
 }
 
+type Banter struct {
+	message string
+	sender  string
+}
+
 type Tracker struct {
 	players   map[string]*PlayerConnection
 	add       chan *PlayerConnection
 	remove    chan string
 	broadcast chan *Broadcast
+	smalltalk chan *Banter
 }
 
 var tracker = Tracker{
@@ -49,6 +55,7 @@ var tracker = Tracker{
 	add:       make(chan *PlayerConnection),
 	remove:    make(chan string),
 	broadcast: make(chan *Broadcast),
+	smalltalk: make(chan *Banter),
 }
 
 func BroadcastMessage(r, m, sender, receiver string) {
@@ -66,6 +73,11 @@ func TrackPlayer(pc *PlayerConnection) {
 
 func UntrackPlayer(roomId, playerId string) {
 	tracker.remove <- makePlayerKey(playerId, roomId)
+}
+
+func MakeSmalltalk(m, sender string) {
+	var banter = Banter{message: m, sender: sender}
+	tracker.smalltalk <- &banter
 }
 
 // Runs the player tracker. This should be started as a new
@@ -87,6 +99,8 @@ func RunTracker() {
 			}
 		case bc := <-tracker.broadcast:
 			broadcast(bc)
+		case banter := <-tracker.smalltalk:
+			smalltalk(banter)
 		}
 	}
 }
@@ -161,4 +175,20 @@ func normalizeBroadcastSender(s, r string) string {
 		return fmt.Sprintf("tracker.%04d", bcCounter)
 	}
 	return s
+}
+
+func smalltalk(banter *Banter) {
+	for _, pc := range tracker.players {
+		var m ChatMessage
+		m.Rtype = "chat"
+		m.Username = banter.sender
+		m.Content = banter.message
+		m.Bookmark = 0
+		j, err := json.MarshalIndent(m, "", "    ")
+		if err != nil {
+			fmt.Printf("smalltalk JSON ERROR\n")
+			return
+		}
+		SendMessage(pc.conn, "*", j, MTPlayer)
+	}
 }
