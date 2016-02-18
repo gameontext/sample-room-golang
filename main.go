@@ -43,7 +43,6 @@ func main() {
 	}
 
 	checkpoint(locus, "registerWithRetries")
-
 	err = registerWithRetries(client)
 	if err != nil {
 		fmt.Printf(err.Error())

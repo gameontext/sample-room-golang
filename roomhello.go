@@ -47,10 +47,10 @@ func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error)
 	}
 
 	mRoom := fmt.Sprintf("%s has entered %s.", req.Username, MyRooms[room])
-	broadcastMessage(room, mRoom, "tracker", "*")
+	BroadcastMessage(room, mRoom, "tracker", "*")
 
 	pc := PlayerConnection{req.UserId, room, conn}
-	addPlayer(&pc)
+	TrackPlayer(&pc)
 
 	mUser := fmt.Sprintf("Welcome to %s, %s. Take your time. Look around.",
 		MyRooms[room], req.Username)

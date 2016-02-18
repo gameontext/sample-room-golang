@@ -17,10 +17,10 @@ func handleGoodbye(conn *websocket.Conn, req *GoodbyeMessage, room string) error
 	checkpoint(locus, fmt.Sprintf("room=%s userid=%s username=%s\n",
 		MyRooms[room], req.UserId, req.Username))
 
-	removePlayer(makePlayerKey(req.UserId, room))
+	UntrackPlayer(room, req.UserId)
 
 	// Announce to the room that the player has left.
 	m := fmt.Sprintf("%s has left %s.", req.Username, config.roomName)
-	broadcastMessage(room, m, "tracker", "*")
+	BroadcastMessage(room, m, "tracker", "*")
 	return nil
 }

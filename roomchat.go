@@ -10,6 +10,6 @@ import (
 )
 
 func handleChat(conn *websocket.Conn, req *GameonRequest, room string) error {
-	broadcastMessage(room, req.Content, req.Username, "*")
+	BroadcastMessage(room, req.Content, req.Username, "*")
 	return nil
 }

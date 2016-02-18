@@ -46,7 +46,23 @@ var tracker = Tracker{
 	broadcast: make(chan *Broadcast),
 }
 
-func trackPlayers() {
+func BroadcastMessage(r, m, sender, receiver string) {
+	var bc = Broadcast{roomId: r, message: m, sender: sender, receiver: receiver}
+	tracker.broadcast <- &bc
+}
+
+func TrackPlayer(pc *PlayerConnection) {
+	tracker.add <- pc
+}
+
+func UntrackPlayer(roomId, playerId string) {
+	tracker.remove <- makePlayerKey(roomId, playerId)
+}
+
+// Runs the player tracker. This should be started as a new
+// goroutine before any callbacks are enabled.
+func RunTracker() {
+	checkpoint("TRACKER", "STARTED")
 	for {
 		select {
 		case pc := <-tracker.add:
@@ -61,21 +77,8 @@ func trackPlayers() {
 	}
 }
 
-func broadcastMessage(r, m, sender, receiver string) {
-	var bc = Broadcast{roomId: r, message: m, sender: sender, receiver: receiver}
-	tracker.broadcast <- &bc
-}
-
 func makePlayerKey(playerId, roomId string) string {
 	return fmt.Sprintf("%s-%s", playerId, roomId)
-}
-
-func addPlayer(pc *PlayerConnection) {
-	tracker.add <- pc
-}
-
-func removePlayer(k string) {
-	tracker.remove <- k
 }
 
 func logPlayer(pc *PlayerConnection, disposition string, logging bool) {
