@@ -30,7 +30,7 @@ func handleRoom(conn *websocket.Conn, req *GameonRequest, room string) error {
 	if 0 == strings.Index(content, "/") {
 		return handleSlashCommand(conn, req, room)
 	}
-	return handleChat(conn, req)
+	return handleChat(conn, req, room)
 }
 
 const (
@@ -52,7 +52,7 @@ type CommandDesc struct {
 
 // This is the list of commands that we add, over and above the normal set.
 // When a player enters our room, we will need to tell them game about these
-// commands so that the game knows to add the to /help output.
+// commands so that the game knows to add them to /help output.
 var commandsWeAdd = []CommandDesc{
 	{"/wink", "(You wonder what this would do.)"},
 }
@@ -63,7 +63,7 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 	locus := "HANDLE.SLASH"
 	cmd, tail, err := parseCommandPrefix(req.Content)
 	if err != nil {
-		sendMessageToRoom(conn, NoMessage, "What? I didn't understand that.", req.UserId)
+		sendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
 		return err
 	}
 	checkpoint(locus, fmt.Sprintf("cmd=%s tail=%s", cmd, tail))
@@ -79,7 +79,7 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 	case slashWink:
 		return wink(conn, req, tail, room)
 	default:
-		sendMessageToRoom(conn, NoMessage, "What? I didn't understand that.", req.UserId)
+		sendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
 		return JSPayloadError{fmt.Sprintf("Unrecognized command: '%s'", cmd)}
 	}
 }
