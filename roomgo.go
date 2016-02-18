@@ -33,14 +33,24 @@ func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) (e er
 	validExit := true
 	banter := ""
 	switch dir {
-	case "n":
+	case "n", "north":
 		banter = "Going North!"
-	case "s":
+		lresp.ExitId = "n"
+	case "s", "south":
 		banter = "Going south! Later, Gator!!"
-	case "e":
+		lresp.ExitId = "s"
+	case "e", "east":
 		banter = "Going east!"
-	case "w":
+		lresp.ExitId = "e"
+	case "w", "west":
 		banter = "Going west, we think."
+		lresp.ExitId = "w"
+	case "home":
+		banter = "You can't go home again."
+		validExit = false
+	case "away":
+		banter = "Never!"
+		validExit = false
 	default:
 		checkpoint(locus, "UNKNOWN.DIRECTION")
 		validExit = false
