@@ -55,7 +55,7 @@ func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error)
 	mUser := fmt.Sprintf("Welcome to %s, %s. Take your time. Look around.",
 		MyRooms[room], req.Username)
 
-	sendMessageToPlayer(conn, mUser, req.UserId)
+	SendMessageToPlayer(conn, mUser, req.UserId)
 
 	// Send back the required response. Do not ignore these errors.
 	var resp HelloResponse
@@ -89,7 +89,7 @@ func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error)
 	if e != nil {
 		return
 	}
-	e = sendMsg(conn, req.UserId, j, MTPlayer)
+	e = SendMessage(conn, req.UserId, j, MTPlayer)
 	return
 }
 

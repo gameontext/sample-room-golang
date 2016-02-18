@@ -63,7 +63,7 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 	locus := "HANDLE.SLASH"
 	cmd, tail, err := parseCommandPrefix(req.Content)
 	if err != nil {
-		sendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
+		SendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
 		return err
 	}
 	checkpoint(locus, fmt.Sprintf("cmd=%s tail=%s", cmd, tail))
@@ -79,7 +79,7 @@ func handleSlashCommand(conn *websocket.Conn, req *GameonRequest, room string) e
 	case slashWink:
 		return wink(conn, req, tail, room)
 	default:
-		sendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
+		SendMessageToPlayer(conn, "What? I didn't understand that.", req.UserId)
 		return JSPayloadError{fmt.Sprintf("Unrecognized command: '%s'", cmd)}
 	}
 }

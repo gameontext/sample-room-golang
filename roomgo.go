@@ -47,14 +47,14 @@ func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) (e er
 		banter = fmt.Sprintf("'%s'?!? There is no exit with that name. Try again.", dir)
 	}
 
-	sendMessageToPlayer(conn, banter, req.UserId)
+	SendMessageToPlayer(conn, banter, req.UserId)
 
 	if validExit {
 		j, err := json.MarshalIndent(lresp, "", "    ")
 		if err != nil {
 			return err
 		}
-		e = sendMsg(conn, req.UserId, j, MTPlayerLocation)
+		e = SendMessage(conn, req.UserId, j, MTPlayerLocation)
 	}
 	return
 }

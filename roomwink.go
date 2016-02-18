@@ -25,5 +25,5 @@ func wink(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
 	if err != nil {
 		return err
 	}
-	return sendMsg(conn, req.UserId, j, MTPlayer)
+	return SendMessage(conn, req.UserId, j, MTPlayer)
 }

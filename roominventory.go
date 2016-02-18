@@ -47,7 +47,7 @@ func checkInventory(conn *websocket.Conn, req *GameonRequest, tail, room string)
 		if tt.msPause > 0 {
 			time.Sleep(time.Duration(tt.msPause) * time.Millisecond)
 		}
-		err = sendMsg(conn, req.UserId, j, MTPlayer)
+		err = SendMessage(conn, req.UserId, j, MTPlayer)
 		if err != nil {
 			return err
 		}

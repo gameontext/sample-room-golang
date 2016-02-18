@@ -142,7 +142,7 @@ func broadcast(bc *Broadcast) {
 				fmt.Printf("BROADCAST JSON ERROR\n")
 				return
 			}
-			sendMsg(c, bc.receiver, j, MTPlayer)
+			SendMessage(c, bc.receiver, j, MTPlayer)
 		} else {
 			if config.debug {
 				fmt.Printf("BROADCAST.%s REJECT\n", r)

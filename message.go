@@ -20,8 +20,7 @@ type PlayerMessage struct {
 var bookmark = 1
 
 // Sends an event message to a player using the current websocket.
-func sendMessageToPlayer(conn *websocket.Conn, mUser, uid string) (e error) {
-	//TODO//cleanup//locus := "SEND.MSG-TO-PLAYER"
+func SendMessageToPlayer(conn *websocket.Conn, mUser, uid string) (e error) {
 	var msg PlayerMessage
 	var j []byte
 	msg.Rtype = "event"
@@ -35,21 +34,12 @@ func sendMessageToPlayer(conn *websocket.Conn, mUser, uid string) (e error) {
 	if e != nil {
 		return
 	}
-	e = sendMsg(conn, uid, j, MTPlayer)
-	//TODO cleanup
-	//m := fmt.Sprintf("%s,%s,%s", MTPlayer, target, string(j))
-	//e = conn.WriteMessage(ExpectedMessageType, []byte(m))
-	//if config.debug {
-	//	checkpoint(locus, fmt.Sprintf("MSG=%s", m))
-	//}
-	//if e != nil {
-	//	checkpoint(locus, fmt.Sprintf("FAILED err=%s", e.Error()))
-	//}
+	e = SendMessage(conn, uid, j, MTPlayer)
 	return
 }
 
 // Sends a message with a JSON payload.
-func sendMsg(conn *websocket.Conn, targetid string, j []byte, messageType string) (e error) {
+func SendMessage(conn *websocket.Conn, targetid string, j []byte, messageType string) (e error) {
 	locus := "SEND.MSG"
 	var m = fmt.Sprintf("%s,%s,%s", messageType, targetid, string(j))
 	e = conn.WriteMessage(ExpectedMessageType, []byte(m))

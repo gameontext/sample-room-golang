@@ -83,6 +83,19 @@ package main
 // its own source file and it is typically named room<cmd>.go, as in
 // roomchat.go, roomlook.go, etc.
 
+// Chat (broadcast messages)
+//
+// It is up to the room to implement the notion of global chat to
+// all parties in a given room. This requires us to track player
+// movement to/from rooms and to remember which websocket connection
+// is currently associated with a given player in a given room. Tracker
+// functions (tracker.go) handle this for us and they use channels to
+// isolate shared data structures. BroadcastMessage(r, m, sender,
+// receiver string) should be used to send broadcast messages.
+// Messages to a player who is still in the room should be sent
+// more directly using SendMessageToPlayer(conn *websocket.Conn,
+// mUser, uid string).
+
 // Deleting rooms
 //
 // At the time that this code was being written, Game On! did not
