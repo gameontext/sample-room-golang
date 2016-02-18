@@ -8,7 +8,9 @@ This application demonstrates how microservice architectures work from two point
 
 ## Introduction
 
-This walkthrough will guide you through adding a room to a running Game On! server.  You will be shown how to setup a container based room that is implemented in the Go programming language.  This solution takes a microservice approach to adding a room to a running Game On! text adventure game server.
+This solution explores microservice architectures via a text adventure game. You can learn more about Game On! at [http://game-on.org/](http://game-on.org/).
+
+This walkthrough will guide you through adding a room to a running Game On! microservices application.  You will be shown how to setup a container-based room that is implemented in the Go programming language.
 
 ### Installation prerequisites
 
