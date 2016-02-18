@@ -6,26 +6,10 @@ package main
 
 // Room /chat command
 import (
-	"encoding/json"
 	"github.com/gorilla/websocket"
 )
 
-type ChatResponse struct {
-	Rtype    string `json:"type,omitempty"`
-	Username string `json:"username,omitempty"`
-	Content  string `json:"content,omitempty"`
-	Bookmark int    `json:"bookmark,omitempty"`
-}
-
-func handleChat(conn *websocket.Conn, req *GameonRequest) error {
-	var resp ChatResponse
-	resp.Rtype = "chat"
-	resp.Username = req.Username
-	resp.Content = req.Content
-	resp.Bookmark = 0
-	j, err := json.MarshalIndent(resp, "", "    ")
-	if err != nil {
-		return err
-	}
-	return sendPlayerResp(conn, "*", j)
+func handleChat(conn *websocket.Conn, req *GameonRequest, room string) error {
+	BroadcastMessage(room, req.Content, req.Username, "*")
+	return nil
 }

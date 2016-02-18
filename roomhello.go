@@ -46,12 +46,16 @@ func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error)
 		return
 	}
 
-	// Announce to the room and the player that the player has entered
-	// the room. Ignore errors for this.
+	mRoom := fmt.Sprintf("%s has entered %s.", req.Username, MyRooms[room])
+	BroadcastMessage(room, mRoom, TrackerSender, "*")
+
+	pc := PlayerConnection{req.UserId, room, conn}
+	TrackPlayer(&pc)
+
 	mUser := fmt.Sprintf("Welcome to %s, %s. Take your time. Look around.",
 		MyRooms[room], req.Username)
-	mRoom := fmt.Sprintf("%s has entered %s.", req.Username, MyRooms[room])
-	sendMessageToRoom(conn, mRoom, mUser, req.UserId)
+
+	SendMessageToPlayer(conn, mUser, req.UserId)
 
 	// Send back the required response. Do not ignore these errors.
 	var resp HelloResponse
@@ -85,7 +89,7 @@ func handleHello(conn *websocket.Conn, req *HelloMessage, room string) (e error)
 	if e != nil {
 		return
 	}
-	e = sendPlayerResp(conn, req.UserId, j)
+	e = SendMessage(conn, req.UserId, j, MTPlayer)
 	return
 }
 

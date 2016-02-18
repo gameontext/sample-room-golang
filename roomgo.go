@@ -20,7 +20,7 @@ type LocationResponse struct {
 }
 
 // Exits our room if the player requests a supported exit.
-func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) error {
+func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) (e error) {
 	locus := "EXITROOM"
 	// Content must be of the form "/go direction" or "/exit direction"
 	// where direction is a valid exit.
@@ -33,38 +33,38 @@ func exitRoom(conn *websocket.Conn, req *GameonRequest, tail, room string) error
 	validExit := true
 	banter := ""
 	switch dir {
-	case "n":
+	case "n", "north":
 		banter = "Going North!"
-	case "s":
+		lresp.ExitId = "n"
+	case "s", "south":
 		banter = "Going south! Later, Gator!!"
-	case "e":
+		lresp.ExitId = "s"
+	case "e", "east":
 		banter = "Going east!"
-	case "w":
+		lresp.ExitId = "e"
+	case "w", "west":
 		banter = "Going west, we think."
+		lresp.ExitId = "w"
+	case "home":
+		banter = "You can't go home again."
+		validExit = false
+	case "away":
+		banter = "Never!"
+		validExit = false
 	default:
 		checkpoint(locus, "UNKNOWN.DIRECTION")
 		validExit = false
 		banter = fmt.Sprintf("'%s'?!? There is no exit with that name. Try again.", dir)
 	}
 
-	var cresp ChatResponse
-	cresp.Rtype = "chat"
-	cresp.Username = req.Username
-	cresp.Content = banter
-	j, err := json.MarshalIndent(cresp, "", "    ")
-	if err != nil {
-		return err
-	}
-	err = sendPlayerResp(conn, req.UserId, j)
-	if err != nil {
-		return err
-	}
+	SendMessageToPlayer(conn, banter, req.UserId)
+
 	if validExit {
 		j, err := json.MarshalIndent(lresp, "", "    ")
 		if err != nil {
 			return err
 		}
-		err = sendResp(conn, req.UserId, j, MTPlayerLocation)
+		e = SendMessage(conn, req.UserId, j, MTPlayerLocation)
 	}
-	return err
+	return
 }
