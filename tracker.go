@@ -82,7 +82,7 @@ func MakeSmalltalk(m, sender string) {
 
 // Runs the player tracker. This should be started as a new
 // goroutine before any callbacks are enabled.
-func RunTracker() {
+func TrackPlayers() {
 	checkpoint("TRACKER", "STARTED")
 	for {
 		select {

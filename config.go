@@ -55,7 +55,8 @@ type RoomConfig struct {
 	// delete request.
 	roomToDelete string
 	// The protocol to be used when talking to the game server.
-	protocol string
+	protocol                       string
+	maxSecondsBetweenConversations int
 }
 
 // config is our single, package-wide, source of configuration data.
@@ -86,6 +87,8 @@ func processCommandline() (err error) {
 	flag.IntVar(&config.retries, "retries", 5, "The number of initial registration attempts.")
 	flag.IntVar(&config.secondsBetween, "between", 5, "The number of seconds between registration attempts.")
 	flag.StringVar(&config.roomToDelete, "delete", "", "Delete the room with this id and exit.")
+	flag.IntVar(&config.maxSecondsBetweenConversations, "quietTime", 60,
+		"The maimum number of seconds between randomly injected conversations.")
 
 	flag.Parse()
 	if config.gameonAddr == "" {
