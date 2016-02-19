@@ -6,6 +6,7 @@ package main
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -14,40 +15,59 @@ type Conversation struct {
 	phrase  []string
 }
 
-var ignatz = Conversation{
-	speaker: "Ignatz",
-	phrase:  []string{"Yo. Buddy", "Get outta here."},
-}
-
-var anonymous = Conversation{
-	speaker: "",
+var mouse = Conversation{
+	speaker: "mouse",
 	phrase: []string{
-		"Ahem.  Hello.",
+		"Ahem.\nHello.",
 		"Do you have any chewing gum?",
-		"I haven't found the pony yet.",
-		"Do you smell that?",
+		"Do you smell something?\nThere's supposed to be a pony.\nI haven't found a pony yet.",
 		"The answer is 42, of course.",
-		"Oh. Excuse me.",
+		"Excuse me.",
 		"They say it snows in the summer here sometimes.",
-		"Wait. Don't I know you?",
-		"I wonder what's for dinner?",
-		"I'm ever so hungry",
+		"I think I've seen you before. With the cat.",
+		"I'm ever so hungry.\nI wonder what's for dinner?",
 		"Do you like poetry?",
-		"Oh, gross. I'm pretty sure I stepped in something.",
+		"Oh, gross.\n\nI'm pretty sure I stepped in something.",
 		"sniff",
 		"boo",
+		"Pssst! Try /go home",
+		"Cats make me nervous.",
 	},
 }
 
-var conversation = []*Conversation{&ignatz, &anonymous, &anonymous, &anonymous, &anonymous}
+var cat = Conversation{
+	speaker: "cat",
+	phrase: []string{
+		"Pfffttt!!!",
+		"Zzzzzzz",
+		"zzzzzzzzzzzzz",
+		"Purrrrrrrr",
+		"Meoooowwwww!",
+	},
+}
+
+var conversation = []*Conversation{&cat, &mouse, &mouse, &cat, &mouse}
 
 func RunTalker() {
+	pause := 2
+	priorText := ""
 	for {
 		seconds := rand.Intn(65)
 		c := conversation[rand.Intn(len(conversation))]
 		text := c.phrase[rand.Intn(len(c.phrase))]
+		if priorText == text {
+			continue
+		}
+		priorText = text
 		speaker := c.speaker
+		lines := strings.Split(text, "\n")
 		time.Sleep(time.Duration(seconds) * time.Second)
-		MakeSmalltalk(text, speaker)
+		for _, line := range lines {
+			if len(line) > 0 {
+				MakeSmalltalk(line, speaker)
+			}
+			time.Sleep(time.Duration(pause) * time.Second)
+			speaker = ""
+		}
 	}
 }
