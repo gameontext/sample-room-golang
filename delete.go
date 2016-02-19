@@ -100,5 +100,4 @@ func deleteRoom(client *http.Client, roomId string) (stopTrying bool, err error)
 		printResponseBody(locus, resp, body)
 		return
 	}
-	return
 }
