@@ -31,10 +31,10 @@ Sign up for Bluemix at https://console.ng.bluemix.net and DevOps Services at htt
 ## Get Game On! ID and Shared Secret
 For a new room to register with the Game-On application, you must first log into game-on.org and sign in using one of several methods to get your **Game On! Id** and **Shared Secret**.
 
-1.  Go to [https://game-on.org/](https://game-on.org/) and click **Play**.
-2.  Select any authentication method to log in with your username and password for that type.
-3.  Click the **Edit Profile** button (the person icon) at the top right.
-4.  You should now see **Game On! Id** and **Shared Secret** near the bottom of the page.  (If necessary, refresh the page, or even log out and log back in, to generate your **Shared Secret**).  Please make note of your **Game On! Id** and **Shared Secret** for later in the walkthrough.
+1.  Go to [https://game-on.org/](https://game-on.org/) and click **Enter**.
+2.  Select an authentication method and log in with your user name and password for that type.
+3.  View your user profile using the link in the top right.  It is either your username or a person icon.
+4.  You should now see your **Game On! ID** and **Shared Secret** near the bottom of the page.
 
 ## Getting the source code
 
@@ -81,6 +81,7 @@ Once installed:
 5. If you need to make an IP address available, unbind an IP address currently in use.
 
   `cf ic ip unbind <public IP> <Container ID>`  
+
 ## Game On! room in a Container
 To build a Game On! room in a container, first create the container locally in Docker using the provided Dockerfile, and then push the container onto your Bluemix container registry.
 
@@ -118,7 +119,7 @@ To build a Game On! room in a container, first create the container locally in D
     ```
 
 ### Run the container on Bluemix
-1. Our container uses a startup script which is driven by environment variables. Edit example-container.env and change the environment variable to suit your needs as we will be using this to pass our enviroment variable settings to the container.
+1. The container uses a startup script which is driven by environment variables. Edit example-container.env and change the environment variable to suit your needs as we will be using this to pass enviroment variable settings to the container.
 
  See the commentary in container-startup.sh and example-container.env for additional details.
 
@@ -127,7 +128,7 @@ To build a Game On! room in a container, first create the container locally in D
     cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/<your_namespace>/<imageName>
     ```
 
-   Or, to stay with our previous example,
+   Or, to stay with the previous example,
 
     ```
     cf ic run --env-file=example-container.env -m 256 -d registry.ng.bluemix.net/mystuff/go-room:1.0
