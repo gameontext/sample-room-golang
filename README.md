@@ -1,4 +1,7 @@
 # Microservices with a Game On! Room
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e295bcca0c0342e3b7f32f316b62404a)](https://www.codacy.com/app/gameontext/gameon-room-go?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=gameontext/gameon-room-go&amp;utm_campaign=Badge_Grade)
+
 [Game On!](https://game-on.org/) is both a sample microservices application, and a throwback text adventure brought to you by the wasdev team at IBM. 
 This application demonstrates how microservice architectures work from two points of view:
 
