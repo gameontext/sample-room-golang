@@ -2,7 +2,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/e295bcca0c0342e3b7f32f316b62404a)](https://www.codacy.com/app/gameontext/gameon-room-go?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=gameontext/gameon-room-go&amp;utm_campaign=Badge_Grade)
 
-[Game On!](https://game-on.org/) is both a sample microservices application, and a throwback text adventure brought to you by the wasdev team at IBM. 
+[Game On!](https://gameontext.org/) is both a sample microservices application, and a throwback text adventure brought to you by the wasdev team at IBM. 
 This application demonstrates how microservice architectures work from two points of view:
 
 1. As a Player: Navigate through a network/maze of rooms, where each room is a unique implementation of a common API. Each room supports chat, and interaction with items (some of which may be in the room, some of which might be separately defined services as well).
@@ -11,7 +11,7 @@ This application demonstrates how microservice architectures work from two point
 
 ## Introduction
 
-This solution explores microservice architectures via a text adventure game. You can learn more about Game On! at [http://game-on.org/](http://game-on.org/).
+This solution explores microservice architectures via a text adventure game. You can learn more about Game On! at [http://gameontext.org/](http://gameontext.org/).
 
 This walkthrough will guide you through adding a room to a running Game On! microservices application.  You will be shown how to setup a container-based room that is implemented in the Go programming language.
 
@@ -32,9 +32,9 @@ To build a Game On! room in Bluemix, you will first need a Bluemix account.
 Sign up for Bluemix at https://console.ng.bluemix.net and DevOps Services at https://hub.jazz.net. When you sign up, you'll create an IBM ID, create an alias, and register with Bluemix.
 
 ## Get Game On! ID and Shared Secret
-For a new room to register with the Game-On application, you must first log into game-on.org and sign in using one of several methods to get your **Game On! Id** and **Shared Secret**.
+For a new room to register with the Game-On application, you must first log into gameontext.org and sign in using one of several methods to get your **Game On! Id** and **Shared Secret**.
 
-1.  Go to [https://game-on.org/](https://game-on.org/) and click **Enter**.
+1.  Go to [https://gameontext.org/](https://gameontext.org/) and click **Enter**.
 2.  Select an authentication method and log in with your user name and password for that type.
 3.  View your user profile using the link in the top right.  It is either your username or a person icon.
 4.  You should now see your **Game On! ID** and **Shared Secret** near the bottom of the page.
@@ -143,9 +143,9 @@ To build a Game On! room in a container, first create the container locally in D
     ```
 
 ## Access room on Game On!
-Once the room is set up and it has registered with the microservices application, it will be accessible on [Game On!](https://game-on.org/). It may take a moment for the room to appear.
+Once the room is set up and it has registered with the microservices application, it will be accessible on [Game On!](https://gameontext.org/). It may take a moment for the room to appear.
 
-1. Log in to [Game On!](https://game-on.org/) using the authentication method you used to create your user ID and shared secret for the registered room.
+1. Log in to [Game On!](https://gameontext.org/) using the authentication method you used to create your user ID and shared secret for the registered room.
 2. Use the Game On! command `/listmyrooms` from The First Room, to see your list of rooms. Once your room is registered, it will appear in that list.
 3. To get to your room, navigate through the network or go directly to it using the `/teleport` command from The First Room.
 
