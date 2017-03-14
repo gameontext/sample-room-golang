@@ -9,7 +9,7 @@
 #   ROOM_NAME     - Your name for the room.
 #
 # The following environment variables are optional:
-#   GAMEON_ADDR   - The game server address, defaults to game-on.org.
+#   GAMEON_ADDR   - The game server address, defaults to gameontext.org.
 #   GAMEON_PORT   - Our external port, defaults to 3000.
 #                   (This is needed for the websocket callback.)
 #   GAMEON_DEBUG  - Any non-empty value turns on debug output
@@ -49,7 +49,7 @@ assert_var_set GAMEON_SECRET $GAMEON_SECRET
 assert_var_set ROOM_NAME $ROOM_NAME
 
 # Make sure any optional env vars are given default values if they are not defined
-export GAMEON_ADDR=${GAMEON_ADDR-game-on.org}
+export GAMEON_ADDR=${GAMEON_ADDR-gameontext.org}
 export GAMEON_PORT=${GAMEON_PORT-3000}
 export GAMEON_REG_RETRIES=${GAMEON_REG_RETRIES-10}
 export GAMEON_REG_SECONDS_BETWEEN=${GAMEON_REG_SECONDS_BETWEEN-15}
