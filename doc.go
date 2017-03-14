@@ -57,7 +57,7 @@ package main
 // in our list of previously-registered rooms.
 
 // Game On!
-// Main site: https://game-on.org
+// Main site: https://gameontext.org
 
 // JSON Marshalling Notes
 //
