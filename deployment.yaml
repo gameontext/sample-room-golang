@@ -1,0 +1,65 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sample-room-golang-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sample-room-golang
+    spec:
+      containers:
+      - name: sample-room-golang
+        image: <image name>
+        env:
+          - name: CONTAINER_IP
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: CONTAINER_IP
+          - name: GAMEON_ID
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_ID
+          - name: GAMEON_SECRET
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_SECRET
+          - name: ROOM_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: ROOM_NAME
+          - name: GAMEON_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_PORT
+          - name: GAMEON_ADDR
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_ADDR
+          - name: GAMEON_DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_DEBUG
+          - name: GAMEON_REG_RETRIES
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_REG_RETRIES
+          - name: GAMEON_REG_SECONDS_BETWEEN
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_REG_SECONDS_BETWEEN
+          - name: GAMEON_TIMESHIFT
+            valueFrom:
+              configMapKeyRef:
+                name: my-config
+                key: GAMEON_TIMESHIFT

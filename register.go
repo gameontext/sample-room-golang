@@ -8,6 +8,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -108,8 +109,9 @@ func checkForPriorRegistration(client *http.Client) (registered bool, err error)
 	u := fmt.Sprintf("http://%s/map/v1/sites?%s",
 		config.gameonAddr,
 		queryParams)
+	fmt.Println(u)
 	if config.debug {
-		checkpoint(locus, fmt.Sprintf(".GET.URL %s", u))
+		checkpoint(locus, fmt.Sprintf("GET.URL %s", u))
 	}
 
 	req, err := http.NewRequest("GET", u, nil)
@@ -138,9 +140,9 @@ func checkForPriorRegistration(client *http.Client) (registered bool, err error)
 			var regResp [1]RoomRegistrationResp
 			e := json.Unmarshal([]byte(body), &regResp)
 			if e != nil {
-				fmt.Printf("%s: JSON unmarshalling error: %s\n",
+				log.Printf("%s: JSON unmarshalling error: %s\n",
 					locus, e.Error())
-				fmt.Printf("%s : Offending JSON: %s\n", locus, body)
+				log.Printf("%s : Offending JSON: %s\n", locus, body)
 				return
 			}
 			rememberedRegistration.Id = regResp[0].Id
@@ -164,18 +166,18 @@ func registerOurRoom(client *http.Client) (err error) {
 	var registration string
 	registration, err = genRegistration()
 	if err != nil {
-		fmt.Printf("\nREG.REGROOM.InternalError\n")
-		fmt.Printf("Internal registration error: %s\n", err.Error())
+		log.Printf("\nREG.REGROOM.InternalError\n")
+		log.Printf("Internal registration error: %s\n", err.Error())
 		return
 	}
 
 	u := fmt.Sprintf("%s://%s/map/v1/sites", config.protocol, config.gameonAddr)
 
 	if config.debug {
-		fmt.Printf("\nREG.POST URL: %s\n", u)
-		fmt.Println("----- registration json begin -----")
-		fmt.Println(registration)
-		fmt.Println("----- registration json end -----")
+		log.Printf("\nREG.POST URL: %s\n", u)
+		log.Println("----- registration json begin -----")
+		log.Println(registration)
+		log.Println("----- registration json end -----")
 	}
 
 	req, err := http.NewRequest("POST", u, strings.NewReader(registration))
@@ -219,7 +221,7 @@ func registerOurRoom(client *http.Client) (err error) {
 func printRoomRegistrationResp(locus string, r *RoomRegistrationResp) {
 	j, err := json.MarshalIndent(r, "", "    ")
 	if err == nil {
-		fmt.Printf("\n%s\n%s\n", locus, string(j))
+		log.Printf("\n%s\n%s\n", locus, string(j))
 	}
 }
 
@@ -259,12 +261,12 @@ func traceResponseBody(locus string, r *http.Response, body string) {
 
 // Unconditionally print an http.Response body string.
 func printResponseBody(locus string, r *http.Response, body string) {
-	fmt.Printf("\n%s.RESP.StatusCode=%s\n", locus, r.Status)
+	log.Printf("\n%s.RESP.StatusCode=%s\n", locus, r.Status)
 	if r.StatusCode == http.StatusNotFound {
 		// Avoid the noise.
 		return
 	}
-	fmt.Printf("%s.RESP.Body='%s'\n", locus, body)
+	log.Printf("%s.RESP.Body='%s'\n", locus, body)
 }
 
 // We stash our room registration response in rememberedRegistration
@@ -277,9 +279,9 @@ func rememberRegistration(r *http.Response, body string) (err error) {
 	var rememberedRegistration RoomRegistrationResp
 	err = json.Unmarshal([]byte(body), &rememberedRegistration)
 	if err != nil {
-		fmt.Printf("rememberRegistration : A JSON unmarshalling error occured: %s\n",
+		log.Printf("rememberRegistration : A JSON unmarshalling error occured: %s\n",
 			err.Error())
-		fmt.Printf("rememberRegistration :Offending JSON: %s\n", body)
+		log.Printf("rememberRegistration :Offending JSON: %s\n", body)
 		return
 	}
 	if config.debug {
@@ -338,9 +340,9 @@ func rememberMyRooms(client *http.Client) (err error) {
 		var qr [MaxRegQueries]RoomQueryResp
 		e := json.Unmarshal([]byte(body), &qr)
 		if e != nil {
-			fmt.Printf("%s: JSON unmarshalling error: %s\n",
+			log.Printf("%s: JSON unmarshalling error: %s\n",
 				locus, e.Error())
-			fmt.Printf("%s : Offending JSON: %s\n", locus, body)
+			log.Printf("%s : Offending JSON: %s\n", locus, body)
 			return
 		}
 		for _, r := range qr {
@@ -350,7 +352,7 @@ func rememberMyRooms(client *http.Client) (err error) {
 		}
 		if config.debug {
 			for k, v := range MyRooms {
-				fmt.Printf("%s --> %s\n", k, v)
+				log.Printf("%s --> %s\n", k, v)
 			}
 		}
 		return

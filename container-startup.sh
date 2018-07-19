@@ -25,7 +25,7 @@
 #   GAMEON_REG_SECONDS_BETWEEN - Number of seconds between registration
 #                                attempts. Defaults to 30
 
-export ROOM_BINARY=$GOPATH/bin/gameon-room-go
+export ROOM_BINARY=$GOPATH/bin/sample-room-golang
 # Print an error message ($1) and exit.
 function fatal
 {

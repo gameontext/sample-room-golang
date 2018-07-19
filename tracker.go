@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -153,13 +154,13 @@ func broadcast(bc *Broadcast) {
 			m.Bookmark = 0
 			j, err := json.MarshalIndent(m, "", "    ")
 			if err != nil {
-				fmt.Printf("BROADCAST JSON ERROR\n")
+				log.Printf("BROADCAST JSON ERROR\n")
 				return
 			}
 			SendMessage(c, bc.receiver, j, MTPlayer)
 		} else {
 			if config.debug {
-				fmt.Printf("BROADCAST.%s REJECT\n", r)
+				log.Printf("BROADCAST.%s REJECT\n", r)
 			}
 		}
 	}
@@ -186,7 +187,7 @@ func smalltalk(banter *Banter) {
 		m.Bookmark = 0
 		j, err := json.MarshalIndent(m, "", "    ")
 		if err != nil {
-			fmt.Printf("smalltalk JSON ERROR\n")
+			log.Printf("smalltalk JSON ERROR\n")
 			return
 		}
 		SendMessage(pc.conn, "*", j, MTPlayer)
