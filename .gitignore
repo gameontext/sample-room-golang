@@ -1,5 +1,4 @@
 *~
 # Ignore our default binary name
-gameon-room-go
-# Ignore files in the experimental directory
-experimental
+sample-room-golang
+/vendor

@@ -8,9 +8,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 )
 
-const localSecret = "MyRegistrationSecret"
+const localSecret = "<LocalSecret>"
 
 // A RoomConfig struct contains important, frequently-needed, information
 // about our current room registration as well as our interaction with
@@ -123,24 +124,24 @@ func processCommandline() (err error) {
 }
 
 func printConfig(c *RoomConfig) {
-	fmt.Printf("gameonAddr=%s\n", config.gameonAddr)
+	log.Printf("gameonAddr=%s\n", config.gameonAddr)
 	// Many things are useless when we are just doing a delete.
 	if config.roomToDelete == "" {
-		fmt.Printf("callbackAddr=%s\n", config.callbackAddr)
-		fmt.Printf("callbackPort=%d\n", config.callbackPort)
-		fmt.Printf("listeningPort=%d\n", config.listeningPort)
-		fmt.Printf("roomName=%s\n", config.roomName)
-		fmt.Printf("north=%s\n", config.north)
-		fmt.Printf("south=%s\n", config.south)
-		fmt.Printf("east=%s\n", config.east)
-		fmt.Printf("west=%s\n", config.west)
+		log.Printf("callbackAddr=%s\n", config.callbackAddr)
+		log.Printf("callbackPort=%d\n", config.callbackPort)
+		log.Printf("listeningPort=%d\n", config.listeningPort)
+		log.Printf("roomName=%s\n", config.roomName)
+		log.Printf("north=%s\n", config.north)
+		log.Printf("south=%s\n", config.south)
+		log.Printf("east=%s\n", config.east)
+		log.Printf("west=%s\n", config.west)
 	}
-	fmt.Printf("debug=%v\n", config.debug)
-	fmt.Printf("roomToDelete=%v\n", config.roomToDelete)
-	fmt.Printf("localServer=%v\n", config.localServer)
-	fmt.Printf("timeShift=%d\n", config.timeShift)
+	log.Printf("debug=%v\n", config.debug)
+	log.Printf("roomToDelete=%v\n", config.roomToDelete)
+	log.Printf("localServer=%v\n", config.localServer)
+	log.Printf("timeShift=%d\n", config.timeShift)
 	if config.debug {
-		fmt.Printf("id=%s\n", config.id)
-		fmt.Printf("secret=%s\n", config.secret)
+		log.Printf("id=%s\n", config.id)
+		log.Printf("secret=%s\n", config.secret)
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -38,9 +39,21 @@ func addAuthenticationHeaders(req *http.Request, body string) {
 	req.Header.Set("gameon-signature", sig)
 	if config.debug {
 		for _, k := range []string{"gameon-id", "gameon-date", "gameon-sig-body", "gameon-signature"} {
-			fmt.Printf("%s=%s\n", k, req.Header.Get(k))
+			log.Printf("%s=%s\n", k, req.Header.Get(k))
 		}
 	}
+}
+
+func getHandshakeHeader(req *http.Request) http.Header {
+	ts := makeTimestamp()
+	tokens := []string{ts, req.Header.Get("gameon-signature")}
+	newSig := buildHmac(tokens, config.secret)
+
+	return http.Header{
+		"gameon-date":      {ts},
+		"gameon-signature": {newSig},
+	}
+
 }
 
 func hash(message string) string {
@@ -56,6 +69,7 @@ func buildHmac(tokens []string, secret string) string {
 	for _, t := range tokens {
 		s += t
 	}
+	fmt.Println("Hashing: ", s, "with secret", secret)
 	h.Write([]byte(s))
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
@@ -67,14 +81,28 @@ func buildHmac(tokens []string, secret string) string {
 // clock on a remote GameOn! server.
 func makeTimestamp() string {
 	if config.timeShift == 0 {
-		return time.Now().UTC().Format(time.RFC3339Nano)
+		return time.Now().Format(time.RFC1123)
 	}
 	locus := "MAKE.TIMESTAMP"
 	t1 := time.Now()
 	t2 := t1.Add(time.Duration(config.timeShift) * time.Millisecond)
-	ourTime := t1.UTC().Format(time.RFC3339Nano)
-	serverTime := t2.UTC().Format(time.RFC3339Nano)
+	ourTime := t1.Format(time.RFC1123)
+	serverTime := t2.Format(time.RFC1123)
 	checkpoint(locus, fmt.Sprintf("ourTime    %s", ourTime))
 	checkpoint(locus, fmt.Sprintf("serverTime %s", serverTime))
 	return serverTime
 }
+
+// func makeTimestamp() string {
+// 	if config.timeShift == 0 {
+// 		return time.Now().UTC().Format(time.RFC3339Nano)
+// 	}
+// 	locus := "MAKE.TIMESTAMP"
+// 	t1 := time.Now()
+// 	t2 := t1.Add(time.Duration(config.timeShift) * time.Millisecond)
+// 	ourTime := t1.UTC().Format(time.RFC3339Nano)
+// 	serverTime := t2.UTC().Format(time.RFC3339Nano)
+// 	checkpoint(locus, fmt.Sprintf("ourTime    %s", ourTime))
+// 	checkpoint(locus, fmt.Sprintf("serverTime %s", serverTime))
+// 	return serverTime
+// }

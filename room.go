@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"strings"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -102,7 +103,7 @@ func parseCommandPrefix(s string) (cmd, tail string, err error) {
 	hlen := len(haystack)
 	for _, key := range commandsWeSupport {
 		if config.debug {
-			fmt.Printf("parseCommandPrefix: '%s' vs '%s'\n", key, haystack)
+			log.Printf("parseCommandPrefix: '%s' vs '%s'\n", key, haystack)
 		}
 		n := len(key)
 		if hlen < n {
